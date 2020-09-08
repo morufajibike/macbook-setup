@@ -1,0 +1,13 @@
+git
+hub
+tmux
+vscode
+ipython
+pre-commit
+awscli
+azure-cli
+terraform
+terraform-docs
+tflint
+tfsec
+python3
