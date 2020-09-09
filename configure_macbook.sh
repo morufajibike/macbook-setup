@@ -30,3 +30,30 @@ else
     echo "tmux plugin manager already installed. skipping..."
 fi
 
+# Install oh-my-zsh
+echo "--- Installing oh-my-zsh ---"
+if [ -z "$(zsh --version)" ]; then
+    /bin/bash -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+fi
+
+for dotfile in .zshrc .vimrc .tmux.conf
+do
+    if [ -f "$HOME/$dotfile" ]; then
+        echo "--- backing up $HOME/$dotfile to $HOME/$dotfile.backup---"
+    	# cp $HOME/$dotfile $HOME/$dotfile.backup
+    fi
+
+    echo "--- copying dotfiles/$dotfile to $HOME/$dotfile ---"
+    cp dotfiles/$dotfile $HOME/$dotfile
+    #. $HOME/$dotfile
+done
+
+tmux source $HOME/.tmux.conf
+
+echo "--- Install docker ---"
+brew install docker docker-compose docker-machine xhyve docker-machine-driver-xhyve
+
+sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve 
+sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+docker-machine create default --driver xhyve --xhyve-experimental-nfs-share
+

@@ -11,3 +11,4 @@ terraform-docs
 tflint
 tfsec
 python3
+iterm2
