@@ -1,7 +1,7 @@
+curl
 git
 hub
 tmux
-vscode
 ipython
 pre-commit
 awscli
@@ -12,3 +12,5 @@ tflint
 tfsec
 python3
 iterm2
+zsh
+bash-completion
