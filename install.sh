@@ -9,10 +9,10 @@ else
     brew update
 fi
 
-# Install productivity packages
-for pkg in `cat packages.txt`
+# Install brew packages
+for pkg in `cat brew_pkgs.txt`
     do
-        echo "--- Installing $pkg ---"
+        echo "--- Installing $pkg with brew install ---"
         if [ -z "$($pkg --version)" ]; then
 	    echo "Installing..."
             brew install $pkg
@@ -25,16 +25,23 @@ for pkg in `cat packages.txt`
 echo "--- Installing oh-my-zsh ---"
 /bin/bash -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
+echo "--- Installing vim pathogen ---"
 mkdir -p ~/.vim/autoload ~/.vim/bundle && \
 curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
 
+echo "--- Cloning nerdtree ---"
 git clone https://github.com/preservim/nerdtree.git ~/.vim/bundle/nerdtree
 
-echo '[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"' >> ~/.bash_profile
+BASH_COMPLETION='[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"'
+if grep -Fxq "$BASH_COMPLETION" ~/.bash_profile > /dev/null; then
+   echo "Bash completion already set in bash_profile"
+else
+   echo $BASH_COMPLETION >> ~/.bash_profile
+fi
 
 # Install tmux plugin manager
 echo "--- Cloning tmux plugin manager to ~/.tmux/plugins/tpm ---"
-if [ -d "~/.tmux/plugins/tpm" ]; then
+if [ -d ~/.tmux/plugins/tpm ]; then
     echo "tmux plugin manager already installed. skipping..."
 else
     echo "Cloning..."
@@ -57,24 +64,12 @@ done
 echo "--- Install docker ---"
 brew install docker docker-compose docker-machine xhyve docker-machine-driver-xhyve
 
-echo "--- Installing $pkg ---"
-if [ -z "$($pkg --version)" ]; then
-	echo "Installing..."
-            brew install $pkg
-        else
-            echo "$pkg already installed. skipping..."
-        fi
-
-brew cask install iterm2
-brew cask install google-chrome
-brew cask install visual-studio-code
-brew cask install docker
-brew cask install flux
-brew cask install postman
-brew cask install whatsapp
-
-# (optional) set default shell
-# chsh -s /bin/zsh
+# Install brew packages
+for pkg in `cat brew_cask_pkgs.txt`
+    do
+        echo "--- Installing $pkg with brew cask install ---"
+        brew cask install $pkg
+    done
 
 ./create-ssh-key.sh
 

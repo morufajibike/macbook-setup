@@ -1,0 +1,7 @@
+iterm2
+google-chrome
+visual-studio-code
+docker
+flux
+postman
+whatsapp
