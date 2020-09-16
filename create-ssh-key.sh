@@ -16,5 +16,7 @@ else
 
    ssh-add -K ~/.ssh/id_rsa_github
 
+   echo "--- Below is the public key for ~/.ssh/id_rsa_github.pub"
+   echo "Add it to your Github SSH key"
    cat ~/.ssh/id_rsa_github.pub
 fi

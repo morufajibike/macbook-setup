@@ -6,7 +6,7 @@ if [ -z "$(brew --version)" ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 else
     echo "Homebrew already installed. updating..."
-    #brew update
+    brew update
 fi
 
 # Install productivity packages
@@ -33,9 +33,6 @@ fi
 # Install oh-my-zsh
 echo "--- Installing oh-my-zsh ---"
 /bin/bash -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-#if [ -z "$(zsh --version)" ]; then
-#    /bin/bash -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-#fi
 
 mkdir -p ~/.vim/autoload ~/.vim/bundle && \
 curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
@@ -60,10 +57,6 @@ done
 echo "--- Install docker ---"
 brew install docker docker-compose docker-machine xhyve docker-machine-driver-xhyve
 
-#sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve 
-#sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
-#docker-machine create default --driver xhyve --xhyve-experimental-nfs-share
-
 echo "--- Installing $pkg ---"
 if [ -z "$($pkg --version)" ]; then
 	echo "Installing..."
@@ -79,17 +72,6 @@ brew cask install docker
 brew cask install flux
 brew cask install postman
 brew cask install whatsapp
-
-# Install google chrome
-#echo "-- Install Google Chrome browser ---"
-#if [ -f /Applications/Chrome.app ]; then
-#    echo "Google chrome already installed. skipping..."
-#else
-#    echo "Downloading Google Chrome..."
-#    wget https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg -O ~/Downloads/googlechrome.dmg
-#    open ~/Downloads/googlechrome.dmg
-#    sudo cp -r /Volumes/Google\ Chrome/Chrome.app /Applications/Chrome.app
-#fi
 
 # (optional) set default shell
 # chsh -s /bin/zsh
