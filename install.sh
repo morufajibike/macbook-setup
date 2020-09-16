@@ -21,15 +21,6 @@ for pkg in `cat packages.txt`
         fi
     done
 
-# Install tmux plugin manager
-echo "--- Cloning tmux plugin manager to ~/.tmux/plugins/tpm ---"
-if [ -d "~/.tmux/plugins/tpm" ]; then
-    echo "Cloning..."
-    #git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-else
-    echo "tmux plugin manager already installed. skipping..."
-fi
-
 # Install oh-my-zsh
 echo "--- Installing oh-my-zsh ---"
 /bin/bash -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
@@ -40,6 +31,15 @@ curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
 git clone https://github.com/preservim/nerdtree.git ~/.vim/bundle/nerdtree
 
 echo '[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"' >> ~/.bash_profile
+
+# Install tmux plugin manager
+echo "--- Cloning tmux plugin manager to ~/.tmux/plugins/tpm ---"
+if [ -d "~/.tmux/plugins/tpm" ]; then
+    echo "tmux plugin manager already installed. skipping..."
+else
+    echo "Cloning..."
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
 
 for dotfile in .zshrc .vimrc .tmux.conf
 do
@@ -81,4 +81,4 @@ brew cask install whatsapp
 git config --global user.email "abiodun.ajibike1@yahoo.com"
 git config --global user.name "Moruf Ajibike"
 
-tmux source $HOME/.tmux.conf
+tmux source ~/.tmux.conf
