@@ -56,7 +56,6 @@ do
     #. $HOME/$dotfile
 done
 
-tmux source $HOME/.tmux.conf
 
 echo "--- Install docker ---"
 brew install docker docker-compose docker-machine xhyve docker-machine-driver-xhyve
@@ -77,7 +76,9 @@ brew cask install iterm2
 brew cask install google-chrome
 brew cask install visual-studio-code
 brew cask install docker
-
+brew cask install flux
+brew cask install postman
+brew cask install whatsapp
 
 # Install google chrome
 #echo "-- Install Google Chrome browser ---"
@@ -95,3 +96,5 @@ brew cask install docker
 
 git config --global user.email "abiodun.ajibike1@yahoo.com"
 git config --global user.name "Moruf Ajibike"
+
+tmux source $HOME/.tmux.conf
