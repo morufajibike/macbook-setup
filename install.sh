@@ -94,6 +94,8 @@ brew cask install whatsapp
 # (optional) set default shell
 # chsh -s /bin/zsh
 
+./create-ssh-key.sh
+
 git config --global user.email "abiodun.ajibike1@yahoo.com"
 git config --global user.name "Moruf Ajibike"
 
