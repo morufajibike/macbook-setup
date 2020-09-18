@@ -14,3 +14,4 @@ python3
 iterm2
 zsh
 bash-completion
+gh
