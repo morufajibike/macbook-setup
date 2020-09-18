@@ -14,4 +14,4 @@ npm install
 
 ./build.sh
 
-cd $HOME/Document/macbook-setup
+cd $HOME/Documents/macbook-setup

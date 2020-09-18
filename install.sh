@@ -25,6 +25,10 @@ for pkg in `cat brew_pkgs.txt`
 echo "--- Installing oh-my-zsh ---"
 /bin/bash -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
+# Install powerlevel10k
+echo "--- Installing powerlevel10k ---"
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+
 echo "--- Installing vim pathogen ---"
 mkdir -p ~/.vim/autoload ~/.vim/bundle && \
 curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
