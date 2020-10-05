@@ -1,8 +1,13 @@
 #!/bin/bash
 
 # Install python3.7.4 (New Macbooks now come with python3.8 as of the time of writing this)
-pyenv install 3.7.4
-pyenv global 3.7.4
+if [ -z "$(pyenv --version)" ]; then
+  echo "--- Installing pyenv ---"
+  pyenv install 3.7.4
+  pyenv global 3.7.4
+else
+  echo "pyenv already installed. skipping..."
+fi
 
 PYENV_PATH="$(pyenv root)/shims"
 if grep -Fxq "$PYENV_PATH" /etc/paths > /dev/null; then

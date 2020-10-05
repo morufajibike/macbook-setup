@@ -25,22 +25,9 @@ for pkg in `cat brew_pkgs.txt`
 echo "--- Installing oh-my-zsh ---"
 /bin/bash -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
-# Install powerlevel10k
-#echo "--- Installing powerlevel10k ---"
-#git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-
-echo "--- Installing vim pathogen ---"
-mkdir -p ~/.vim/autoload ~/.vim/bundle && \
-curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
-
-echo "--- Cloning nerdtree ---"
-git clone https://github.com/preservim/nerdtree.git ~/.vim/bundle/nerdtree
-
-echo "--- Cloning flake8 ---"
-git clone https://github.com/nvie/vim-flake8.git ~/.vim/bundle/vim-flake8
-
-echo "--- Cloning vim-airline ---"
-git clone https://github.com/vim-airline/vim-airline.git ~/.vim/bundle/vim-airline
+echo "--- Installing vim Vundle ---"
+mkdir -p ~/.vim/bundle
+git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
 
 BASH_COMPLETION='[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"'
