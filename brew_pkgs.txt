@@ -16,3 +16,4 @@ zsh
 bash-completion
 gh
 node
+pyenv
