@@ -11,4 +11,4 @@ else
    echo $PYENV_PATH | sudo tee -a /etc/paths
 fi
 
-# pip install flake8
+pip install flake8

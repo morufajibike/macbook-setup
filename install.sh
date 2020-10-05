@@ -36,6 +36,13 @@ curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
 echo "--- Cloning nerdtree ---"
 git clone https://github.com/preservim/nerdtree.git ~/.vim/bundle/nerdtree
 
+echo "--- Cloning flake8 ---"
+git clone https://github.com/nvie/vim-flake8.git ~/.vim/bundle/vim-flake8
+
+echo "--- Cloning vim-airline ---"
+git clone https://github.com/vim-airline/vim-airline.git ~/.vim/bundle/vim-airline
+
+
 BASH_COMPLETION='[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"'
 if grep -Fxq "$BASH_COMPLETION" ~/.bash_profile > /dev/null; then
    echo "Bash completion already set in bash_profile"

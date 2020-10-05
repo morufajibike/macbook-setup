@@ -2,6 +2,13 @@ set autoindent
 set cindent
 set mouse=a
 set number
+syntax on
+set tabstop=2
+set autoindent
+set expandtab
+set softtabstop=2
+colorscheme industry
+set laststatus=2
 
 nmap <C-t> :NERDTreeToggle<CR>
 
