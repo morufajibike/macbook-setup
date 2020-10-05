@@ -7,3 +7,4 @@ postman
 whatsapp
 zoom
 firefox
+adobe-acrobat-reader
