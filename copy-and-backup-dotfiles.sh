@@ -6,7 +6,7 @@ mkdir -p $backup_dir
 
 echo "Backing up dotfiles to $backup_dir"
 
-for dotfile in .zshrc .vimrc .tmux.conf
+for dotfile in .bashrc .zshrc .vimrc .tmux.conf
 do
     echo "--- About to backup and/or copy $dotfile ---"
     if [ -f "$HOME/$dotfile" ]; then

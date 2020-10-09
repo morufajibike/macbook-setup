@@ -44,4 +44,4 @@ git config --global user.name "Moruf Ajibike"
 tmux source ~/.tmux.conf
 
 # create a backup for dotfiles
-./backup-dotfiles.sh
+./copy-and-backup-dotfiles.sh
