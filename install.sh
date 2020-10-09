@@ -31,18 +31,6 @@ else
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 fi
 
-for dotfile in .zshrc .vimrc .tmux.conf
-do
-    if [ -f "$HOME/$dotfile" ]; then
-        echo "--- backing up $HOME/$dotfile to $HOME/$dotfile.backup---"
-    	# cp $HOME/$dotfile $HOME/$dotfile.backup
-    fi
-
-    echo "--- copying dotfiles/$dotfile to $HOME/$dotfile ---"
-    cp dotfiles/$dotfile $HOME/$dotfile
-    #. $HOME/$dotfile
-done
-
 
 # Install python pkgs
 ./install-python-pkgs.sh
@@ -54,3 +42,6 @@ git config --global user.email "abiodun.ajibike1@yahoo.com"
 git config --global user.name "Moruf Ajibike"
 
 tmux source ~/.tmux.conf
+
+# create a backup for dotfiles
+./backup-dotfiles.sh

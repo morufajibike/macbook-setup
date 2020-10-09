@@ -17,3 +17,4 @@ else
 fi
 
 pip install flake8
+pip install ipython
