@@ -114,3 +114,6 @@ export PATH="/usr/local/opt/openssl/bin:$PATH"
 export PATH="/usr/local/opt/openssl/bin:$PATH"
 
 export DYLD_LIBRARY_PATH=/usr/local/opt/openssl/lib:$DYLD_LIBRARY_PATH
+
+# load fzf
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
