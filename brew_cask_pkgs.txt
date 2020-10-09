@@ -5,6 +5,10 @@ docker
 flux
 postman
 whatsapp
-zoom
+zoomus
 firefox
 adobe-acrobat-reader
+slack
+virtualbox
+gdrive
+dropbox

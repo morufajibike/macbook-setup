@@ -1,25 +1,10 @@
 #!/bin/bash
 
-# Install homebrew
-echo "--- Installing homebrew ---"
-if [ -z "$(brew --version)" ]; then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-else
-    echo "Homebrew already installed. updating..."
-    brew update
-fi
+# Install brew pkgs
+./install-brew-pkgs.sh
 
-# Install brew packages
-for pkg in `cat brew_pkgs.txt`
-    do
-        echo "--- Installing $pkg with brew install ---"
-        if [ -z "$($pkg --version)" ]; then
-	    echo "Installing..."
-            brew install $pkg
-        else
-            echo "$pkg already installed. skipping..."
-        fi
-    done
+# Install fuzzy search for vim
+./install-fzf.sh
 
 # Install oh-my-zsh
 echo "--- Installing oh-my-zsh ---"
@@ -58,16 +43,6 @@ do
     #. $HOME/$dotfile
 done
 
-
-echo "--- Install docker ---"
-brew install docker docker-compose docker-machine xhyve docker-machine-driver-xhyve
-
-# Install brew packages
-for pkg in `cat brew_cask_pkgs.txt`
-    do
-        echo "--- Installing $pkg with brew cask install ---"
-        brew cask install $pkg
-    done
 
 # Install python pkgs
 ./install-python-pkgs.sh
