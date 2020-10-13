@@ -12,3 +12,4 @@ slack
 virtualbox
 gdrive
 dropbox
+google-cloud-sdk
