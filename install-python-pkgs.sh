@@ -18,3 +18,4 @@ fi
 
 pip install flake8
 pip install ipython
+pip install pytest
