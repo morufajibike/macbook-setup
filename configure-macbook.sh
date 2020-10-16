@@ -45,3 +45,11 @@ tmux source ~/.tmux.conf
 
 # create a backup for dotfiles
 ./copy-and-backup-dotfiles.sh
+
+# Install fonts
+# Remember to update Iterm2 preferences:
+# -> Profiles -> Text -> Font -> Dejavu Sans Mono for Powerline
+#                             -> font size -> 15
+#             -> Colors -> Color Presets -> Solarized Dark
+
+./install-fonts.sh
