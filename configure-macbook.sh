@@ -22,6 +22,12 @@ else
    echo $BASH_COMPLETION >> ~/.bash_profile
 fi
 
+if -f ~/.bash_profile; then
+    echo "export PATH="$HOME/.pyenv/bin:$PATH""
+    echo "eval "$(pyenv init -)""
+    echo "eval "$(pyenv virtualenv-init -)""
+fi
+
 # Install tmux plugin manager
 echo "--- Cloning tmux plugin manager to ~/.tmux/plugins/tpm ---"
 if [ -d ~/.tmux/plugins/tpm ]; then
