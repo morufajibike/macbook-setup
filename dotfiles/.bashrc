@@ -13,3 +13,8 @@ fi
 if [ -f '/Users/kurtpeek/Downloads/google-cloud-sdk/completion.bash.inc' ]; then
   source '/Users/kurtpeek/Downloads/google-cloud-sdk/completion.bash.inc';
 fi
+
+#pyenv
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
