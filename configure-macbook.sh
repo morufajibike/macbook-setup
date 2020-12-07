@@ -53,3 +53,6 @@ tmux source ~/.tmux.conf
 ./copy-and-backup-dotfiles.sh
 
 ./install-customizers.sh
+
+### Install vim plugins
+vim +PluginInstall +qall

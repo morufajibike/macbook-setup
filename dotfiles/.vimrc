@@ -38,7 +38,7 @@ nmap <C-t> :NERDTreeToggle<CR>
 
 " execute pathogen#infect()
 
-" autocmd BufWritePost *.py call flake8#Flake8()
+autocmd BufWritePost *.py call flake8#Flake8()
 
 augroup myvimrc
     au!
