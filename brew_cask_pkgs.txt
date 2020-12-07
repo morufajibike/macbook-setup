@@ -7,7 +7,6 @@ postman
 whatsapp
 zoomus
 firefox
-adobe-acrobat-reader
 slack
 virtualbox
 gdrive
