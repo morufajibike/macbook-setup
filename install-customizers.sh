@@ -15,7 +15,7 @@ mkdir -p $custom_zsh_dir
 git clone https://github.com/mbadolato/iTerm2-Color-Schemes.git $custom_zsh_dir/iTerm2-Color-Schemes
 
 # install FiraCode
-git clone https://github.com/tonsky/FiraCode.git $custom_zsh_dir/FireCode
+git clone https://github.com/tonsky/FiraCode.git $custom_zsh_dir/FiraCode
 
 # clone Operator Mono
 git clone https://github.com/kiliman/operator-mono-lig.git $custom_zsh_dir/operator-mono-lig
