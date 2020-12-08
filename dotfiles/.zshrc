@@ -117,3 +117,7 @@ export DYLD_LIBRARY_PATH=/usr/local/opt/openssl/lib:$DYLD_LIBRARY_PATH
 
 # load fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# load bash_profile
+[ -f ~/.bash_profile ] && source ~/.bash_profile
+
