@@ -10,6 +10,10 @@ set softtabstop=2
 colorscheme industry
 set laststatus=2
 
+" Enable folding
+set foldmethod=indent
+set foldlevel=99
+
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
@@ -29,6 +33,7 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'preservim/nerdtree'
 Plugin 'nvie/vim-flake8'
 Plugin 'vim-airline/vim-airline'
+Plugin 'tmhedberg/SimpylFold'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -37,6 +42,9 @@ filetype plugin indent on    " required
 nmap <C-t> :NERDTreeToggle<CR>
 
 " execute pathogen#infect()
+
+" Enable folding with the spacebar
+nnoremap <space> za
 
 autocmd BufWritePost *.py call flake8#Flake8()
 

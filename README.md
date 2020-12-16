@@ -21,3 +21,7 @@ Execute the bash script: `./configure-macbook.sh`
 
 ### Reload Tmux conf
 tmux source ~/.tmux.conf
+
+### Install vundle plugins
+- :PluginInstall
+- vim +PluginInstall +qall
