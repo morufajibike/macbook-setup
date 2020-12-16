@@ -121,3 +121,5 @@ export DYLD_LIBRARY_PATH=/usr/local/opt/openssl/lib:$DYLD_LIBRARY_PATH
 # load bash_profile
 [ -f ~/.bash_profile ] && source ~/.bash_profile
 
+# We want to load pyenv every time we open a new shell
+if which pyenv > /dev/null; then eval "$(pyenv init -)"; fi
