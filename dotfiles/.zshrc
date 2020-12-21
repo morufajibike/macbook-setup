@@ -11,7 +11,10 @@ ZSH_DISABLE_COMPFIX="true"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="agnoster"
+
+# ZSH_THEME="agnoster"
+ZSH_THEME="powerlevel9k/powerlevel9k"
+POWERLEVEL9K_MODE="nerdfont-complete"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -71,7 +74,7 @@ ZSH_THEME="agnoster"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git autopep8 pep8 aws tmux zsh-syntax-highlighting zsh-autosuggestions)
+plugins=(git autopep8 pep8 aws tmux zsh-syntax-highlighting zsh-autosuggestions dnf)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -115,11 +118,12 @@ export PATH="/usr/local/opt/openssl/bin:$PATH"
 
 export DYLD_LIBRARY_PATH=/usr/local/opt/openssl/lib:$DYLD_LIBRARY_PATH
 
-# load fzf
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
 # load bash_profile
 [ -f ~/.bash_profile ] && source ~/.bash_profile
 
+# load fzf
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 # We want to load pyenv every time we open a new shell
 if which pyenv > /dev/null; then eval "$(pyenv init -)"; fi
+
