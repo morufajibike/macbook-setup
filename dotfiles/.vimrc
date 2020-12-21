@@ -7,7 +7,7 @@ set tabstop=2
 set autoindent
 set expandtab
 set softtabstop=2
-colorscheme slate
+colorscheme desert
 set laststatus=2
 
 " Enable folding

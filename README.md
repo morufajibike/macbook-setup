@@ -25,3 +25,7 @@ tmux source ~/.tmux.conf
 ### Install vundle plugins
 - :PluginInstall
 - vim +PluginInstall +qall
+
+### To see available ~/.vimrc colorscheme
+- ls -l /usr/share/vim/vim*/colors/
+- Test with :colorscheme <colour_name>
