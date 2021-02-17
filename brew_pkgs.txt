@@ -17,6 +17,7 @@ bash-completion
 gh
 node
 pyenv
+--HEAD pyenv-virtualenv
 docker-compose
 docker-machine
 xhyve
