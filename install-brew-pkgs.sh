@@ -25,7 +25,7 @@ for pkg in `cat brew_pkgs.txt`
 for pkg in `cat brew_cask_pkgs.txt`
     do
         echo "--- Installing $pkg with brew cask install ---"
-        brew cask install $pkg
+        brew install --cask $pkg
     done
 
 # Clean things up
