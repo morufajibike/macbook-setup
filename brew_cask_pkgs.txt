@@ -12,3 +12,4 @@ virtualbox
 gdrive
 dropbox
 google-cloud-sdk
+dotnet-sdk
