@@ -3,13 +3,13 @@ set cindent
 set mouse=a
 set number
 syntax on
-set tabstop=2
 set autoindent
+set softtabstop=4
+set tabstop=4
 set expandtab
-set softtabstop=2
-colorscheme desert
+set shiftwidth=4
+colorscheme slate
 set laststatus=2
-
 " Enable folding
 set foldmethod=indent
 set foldlevel=99

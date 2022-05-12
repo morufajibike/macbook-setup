@@ -1,3 +1,8 @@
+
+#### FIG ENV VARIABLES ####
+# Please make sure this block is at the start of this file.
+[ -s ~/.fig/shell/pre.sh ] && source ~/.fig/shell/pre.sh
+#### END FIG ENV VARIABLES ####
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -127,10 +132,21 @@ export DYLD_LIBRARY_PATH=/usr/local/opt/openssl/lib:$DYLD_LIBRARY_PATH
 # We want to load pyenv every time we open a new shell
 if which pyenv > /dev/null; then eval "$(pyenv init -)"; fi
 
-# for resolving mysqlclient pip installation errors
 export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
 export PATH="/usr/local/opt/mysql-client/bin:$PATH"
 export LDFLAGS="-L/usr/local/opt/mysql-client/lib"
 export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
 export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
 
+# java
+export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
+export PATH="$PATH:/usr/bin/java"
+export JAVA_HOME=$(/usr/libexec/java_home)
+
+# flutter
+export PATH="$PATH:/Users/morufajibike/Documents/Personal/flutter/flutter/bin"
+
+#### FIG ENV VARIABLES ####
+# Please make sure this block is at the end of this file.
+[ -s ~/.fig/fig.sh ] && source ~/.fig/fig.sh
+#### END FIG ENV VARIABLES ####
