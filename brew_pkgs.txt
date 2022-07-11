@@ -22,4 +22,4 @@ docker-compose
 docker-machine
 xhyve
 docker-machine-driver-xhyve
-
+fig
