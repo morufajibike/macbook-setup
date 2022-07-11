@@ -146,7 +146,3 @@ export JAVA_HOME=$(/usr/libexec/java_home)
 # flutter
 export PATH="$PATH:/Users/morufajibike/Documents/Personal/flutter/flutter/bin"
 
-#### FIG ENV VARIABLES ####
-# Please make sure this block is at the end of this file.
-[ -s ~/.fig/fig.sh ] && source ~/.fig/fig.sh
-#### END FIG ENV VARIABLES ####
