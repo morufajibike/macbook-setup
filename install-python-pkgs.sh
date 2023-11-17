@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Install python3.7.4 (New Macbooks now come with python3.8 as of the time of writing this)
+# Install python 3.9.6 (New Macbooks now come with python3.8 as of the time of writing this)
 if [ -z "$(pyenv --version)" ]; then
   echo "--- Installing pyenv ---"
-  pyenv install 3.7.4
-  pyenv global 3.7.4
+  pyenv install 3.9.6
+  pyenv global 3.9.6
 else
   echo "pyenv already installed. skipping..."
 fi
