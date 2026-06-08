@@ -268,6 +268,33 @@ A few things complete on first use rather than during the bootstrap:
 - **powerlevel10k prompt.** On the first interactive shell, if `~/.p10k.zsh` is
   absent, powerlevel10k runs its `p10k configure` wizard automatically. The
   required `MesloLGS NF` font is installed by the `core` Brewfile group.
+  Re-run the interactive wizard at any time to change the prompt style:
+  ```sh
+  p10k configure
+  ```
+  It is non-destructive — it rewrites `~/.p10k.zsh` with your choices and
+  reloads the prompt. The wizard's first questions detect your terminal font,
+  so the terminal must already be using the `MesloLGS NF` Nerd Font (Ghostty's
+  bundled config sets this; other terminals must set it manually) or the
+  preview glyphs render as missing-glyph boxes. The wizard asks a series of
+  questions; the key answers that produce the one-line **Rainbow** prompt
+  (filled coloured powerline segments) are:
+
+  | Question | Answer |
+  |---|---|
+  | Prompt Style | Rainbow |
+  | Show current time | 24-hour |
+  | Prompt Separators | Angled |
+  | Prompt Heads | Sharp |
+  | Prompt Tails | Flat |
+  | Prompt Height | One line |
+  | Prompt Spacing | Compact |
+  | Icons | Many |
+  | Prompt Flow | Concise |
+
+  then apply/save when prompted. `p10k configure` only affects the machine it
+  is run on; a fresh install elsewhere falls back to the wizard unless
+  `~/.p10k.zsh` is committed into `dotfiles/`.
 - **Vim plugins.** Installed by `30-vim.sh`. To install plugins added to
   `.vimrc` later, or to re-run by hand:
   ```sh
