@@ -54,9 +54,6 @@ fi
 export PATH="$PATH:/usr/bin/java"
 export JAVA_HOME=$(/usr/libexec/java_home 2>/dev/null || true)
 
-# Flutter SDK (update this path if you move the SDK).
-export PATH="$PATH:$HOME/Documents/Personal/flutter/flutter/bin"
-
 # ---------------------------------------------------------------------------
 # Tools
 # ---------------------------------------------------------------------------
