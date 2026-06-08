@@ -1,0 +1,37 @@
+# Identity is a placeholder here. The real per-machine name and email are
+# written to ~/.gitconfig.local by scripts/25-git-identity.sh and included at
+# the end of this file (last-wins), so this tracked config stays static.
+[user]
+	name = Your Name
+	email = you@example.com
+[core]
+	# Portable paths — do not hardcode absolute system paths here.
+	excludesfile = ~/.gitignore_global
+	autocrlf = input
+	hooksPath = ~/.git-hooks
+	# [init] templatedir was removed: it pointed at a path absent on fresh
+	# machines (~/Documents/Work/Personal/pre-commit-hooks). Global pre-commit
+	# hooks are managed via core.hooksPath above instead.
+[push]
+	default = current
+[pull]
+	rebase = true
+[credential "https://github.com"]
+	helper =
+	# Use the GitHub CLI for credential management — portable across machines.
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !gh auth git-credential
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+[url "https://github.com/"]
+	insteadOf = git://github.com/
+# Machine-local overrides (written by scripts/25-git-identity.sh). Kept last so
+# the real identity overrides the placeholder [user] block above. This file is
+# untracked and never committed.
+[include]
+	path = ~/.gitconfig.local

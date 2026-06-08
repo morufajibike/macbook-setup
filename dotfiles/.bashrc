@@ -1,34 +1,23 @@
+# ~/.bashrc — sourced for interactive bash shells.
 
-#### FIG ENV VARIABLES ####
-# Please make sure this block is at the start of this file.
-[ -s ~/.fig/shell/pre.sh ] && source ~/.fig/shell/pre.sh
-#### END FIG ENV VARIABLES ####
+# Shared aliases and functions.
+source ~/.bash_additions
 
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-# Add github private key for SSH connections
-ssh-add -K ~/.ssh/id_rsa_github
-
-# The next line updates PATH for the Google Cloud SDK.
-# if [ -f '/Users/kurtpeek/Downloads/google-cloud-sdk/path.bash.inc' ]; then
-#  source '/Users/kurtpeek/Downloads/google-cloud-sdk/path.bash.inc';
-# fi
-
-# The next line enables shell command completion for gcloud.
-#if [ -f '/Users/kurtpeek/Downloads/google-cloud-sdk/completion.bash.inc' ]; then
-#  source '/Users/kurtpeek/Downloads/google-cloud-sdk/completion.bash.inc';
-#fi
-
-#pyenv
+# pyenv initialisation.
 export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+if command -v pyenv >/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
+fi
 
-[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+# Bash completion (Homebrew).
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] \
+  && source "/usr/local/etc/profile.d/bash_completion.sh"
 
-source <(kubectl completion bash)
+# kubectl bash completion.
+if command -v kubectl >/dev/null 2>&1; then
+  source <(kubectl completion bash)
+fi
 
-#### FIG ENV VARIABLES ####
-# Please make sure this block is at the end of this file.
-[ -s ~/.fig/fig.sh ] && source ~/.fig/fig.sh
-#### END FIG ENV VARIABLES ####
+# Rust / cargo environment.
+[ -f "$HOME/.local/bin/env" ] && source "$HOME/.local/bin/env"
