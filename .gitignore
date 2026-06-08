@@ -1,2 +1,6 @@
 .DS_Store
 *.swp
+
+# Ensure the tracked git hooks are never dropped by a global core.excludesFile.
+!git-hooks/
+!git-hooks/**
