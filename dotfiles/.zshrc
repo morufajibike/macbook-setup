@@ -35,30 +35,13 @@ else
   BREW_PREFIX=""
 fi
 
-# OpenSSL (1.1 required by some Python packages and older tooling).
-# Guarded so dead paths are not added when the formula is absent.
-if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/openssl@1.1" ]; then
-  export PATH="${BREW_PREFIX}/opt/openssl@1.1/bin:$PATH"
-  export LDFLAGS="-L${BREW_PREFIX}/opt/openssl@1.1/lib"
-  export CPPFLAGS="-I${BREW_PREFIX}/opt/openssl@1.1/include"
-fi
-
-# OpenSSL (legacy path used by some tools).
-if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/openssl" ]; then
-  export PATH="${BREW_PREFIX}/opt/openssl/bin:$PATH"
-  export DYLD_LIBRARY_PATH="${BREW_PREFIX}/opt/openssl/lib:${DYLD_LIBRARY_PATH:-}"
-fi
-
 # MySQL client (for building Python/Ruby MySQL extensions).
 if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/mysql-client" ]; then
   export PATH="${BREW_PREFIX}/opt/mysql-client/bin:$PATH"
   export PKG_CONFIG_PATH="${BREW_PREFIX}/opt/mysql-client/lib/pkgconfig"
 fi
 
-# Java 11 (via Homebrew openjdk@11).
-if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/openjdk@11" ]; then
-  export PATH="${BREW_PREFIX}/opt/openjdk@11/bin:$PATH"
-fi
+# macOS system Java.
 export PATH="$PATH:/usr/bin/java"
 export JAVA_HOME=$(/usr/libexec/java_home 2>/dev/null || true)
 

@@ -27,6 +27,10 @@
 #   iterm2           — replaced by ghostty
 #   wezterm@nightly  — not in regular use
 
+# Adopt an app already present on disk instead of reinstalling it. Must sit
+# before the first `# group:` marker so the group parser ignores it.
+cask_args adopt: true
+
 # group: core
 # Always recommended: shell, git essentials, and the prompt font. The font is
 # kept here because the Ghostty/powerlevel10k prompt glyphs need it regardless
@@ -65,15 +69,12 @@ brew "stern"
 brew "terraform-docs"
 brew "terragrunt"
 brew "tfenv"
-brew "tflint"
 brew "tfsort"
 brew "trivy"
 
 # group: languages
 brew "ipython"
 brew "node"
-brew "openjdk@11"
-brew "openssl@1.1"
 brew "pipenv"
 brew "pyenv"
 brew "python@3.10"
@@ -86,7 +87,6 @@ brew "postgresql@17"
 # group: apps
 cask "adobe-acrobat-reader"
 cask "docker"
-cask "dropbox"
 cask "firefox"
 cask "flux"
 cask "ghostty"
