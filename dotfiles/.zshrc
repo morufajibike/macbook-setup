@@ -100,16 +100,6 @@ claude() {
   fi
 }
 
-# ---------------------------------------------------------------------------
-# Serverless Framework tab completions (retained from original config)
-# ---------------------------------------------------------------------------
-[[ -f /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.zsh ]] \
-  && source /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.zsh
-[[ -f /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.zsh ]] \
-  && source /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.zsh
-[[ -f /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/slss.zsh ]] \
-  && source /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/slss.zsh
-
 # powerlevel10k prompt configuration. If ~/.p10k.zsh is absent, p10k runs its
 # interactive `p10k configure` wizard automatically on first shell launch.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
