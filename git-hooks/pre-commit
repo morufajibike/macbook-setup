@@ -1,0 +1,25 @@
+#!/bin/sh
+# Global pre-commit hook (installed via core.hooksPath).
+# Fires on every commit in every repo on this machine.
+#
+#   1. Runs the global hooks defined in ~/.pre-commit-config.yaml
+#      (gitleaks + the standard hook set).
+#   2. If the current repo also has its own .pre-commit-config.yaml,
+#      runs that too.
+#
+# Bypass for a single commit: `git commit --no-verify ...`
+# Disable for a single repo: `git config --local core.hooksPath ''`
+
+set -e
+
+# If pre-commit isn't installed, do nothing rather than blocking the commit.
+command -v pre-commit >/dev/null 2>&1 || exit 0
+
+# 1. Global hooks (gitleaks + terraform + json + whitespace), if a global config exists.
+[ -f "$HOME/.pre-commit-config.yaml" ] \
+  && pre-commit run --config "$HOME/.pre-commit-config.yaml" --hook-stage pre-commit
+
+# 2. Per-repo hooks if the current repo has its own config.
+[ -f .pre-commit-config.yaml ] && pre-commit run --hook-stage pre-commit
+
+exit 0

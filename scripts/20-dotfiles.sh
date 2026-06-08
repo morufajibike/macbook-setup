@@ -43,6 +43,12 @@ done < <(find "${DOTFILES_DIR}" -type f -print0)
 
 # backup_then_symlink already handles directories and derives the backup
 # basename, so the same helper used for individual dotfiles applies here.
-backup_then_symlink "${ROOT}/git-hooks" "${HOME}/.git-hooks"
+# Guard against a fresh clone where git-hooks/ was never committed (or was
+# dropped by a global core.excludesFile) so the bootstrap does not abort.
+if [ -d "${ROOT}/git-hooks" ]; then
+  backup_then_symlink "${ROOT}/git-hooks" "${HOME}/.git-hooks"
+else
+  warn "git-hooks/ not found in the repository — skipping git hooks symlink."
+fi
 
 info "20-dotfiles: done."
