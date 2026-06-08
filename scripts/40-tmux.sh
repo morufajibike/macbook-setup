@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/40-tmux.sh — install TPM and run plugin installation non-interactively.
+# scripts/40-tmux.sh -- install TPM and run plugin installation non-interactively.
 
 set -euo pipefail
 
@@ -14,11 +14,11 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 TPM_DIR="${HOME}/.tmux/plugins/tpm"
 
 if [[ -d "${TPM_DIR}" ]]; then
-  info "TPM already present — skipping clone."
+  info "TPM already present -- skipping clone."
 else
   info "Cloning TPM..."
   ensure_dir "${HOME}/.tmux/plugins"
-  git clone --depth=1 \
+  run git clone --depth=1 \
     https://github.com/tmux-plugins/tpm \
     "${TPM_DIR}"
 fi
@@ -33,9 +33,9 @@ if [[ -x "${INSTALL_SCRIPT}" ]]; then
   info "Installing tmux plugins via TPM..."
   # TPM's install_plugins script reads ~/.tmux.conf for the plugin list.
   # TMUX is deliberately unset so the script runs in a non-attached context.
-  TMUX="" "${INSTALL_SCRIPT}"
+  run env TMUX="" "${INSTALL_SCRIPT}"
 else
-  warn "TPM install script not found at ${INSTALL_SCRIPT} — plugins not installed."
+  warn "TPM install script not found at ${INSTALL_SCRIPT} -- plugins not installed."
 fi
 
 info "40-tmux: done."

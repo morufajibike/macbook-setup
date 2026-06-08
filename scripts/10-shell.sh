@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/10-shell.sh — install oh-my-zsh plus required themes and plugins.
+# scripts/10-shell.sh -- install oh-my-zsh plus required themes and plugins.
 #
 # This is the single, authoritative source for shell customisation.
 # All clone operations are idempotent: they are skipped if the target
@@ -16,7 +16,13 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 # ---------------------------------------------------------------------------
 
 if [[ -d "${HOME}/.oh-my-zsh" ]]; then
-  info "oh-my-zsh already installed — skipping."
+  info "oh-my-zsh already installed -- skipping."
+elif [[ "${DRY_RUN}" == "1" ]]; then
+  # An explicit guard is required here (not `run`): the installer is fetched
+  # via `$(curl ...)`, which the shell expands BEFORE `run` is invoked, so a
+  # `run ... "$(curl ...)"` form would still perform the network fetch in
+  # dry-run mode. Guarding the whole block keeps dry-run side-effect-free.
+  info "[dry-run] would install oh-my-zsh (unattended) via the official install script."
 else
   info "Installing oh-my-zsh (unattended)..."
   # RUNZSH=no prevents the installer from launching a new zsh session.
@@ -35,10 +41,10 @@ ZSH_CUSTOM="${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}"
 POWERLEVEL10K_DIR="${HOME}/.oh-my-zsh/custom/themes/powerlevel10k"
 
 if [[ -d "${POWERLEVEL10K_DIR}" ]]; then
-  info "powerlevel10k already present — skipping clone."
+  info "powerlevel10k already present -- skipping clone."
 else
   info "Cloning powerlevel10k theme..."
-  git clone --depth=1 \
+  run git clone --depth=1 \
     https://github.com/romkatv/powerlevel10k.git \
     "${POWERLEVEL10K_DIR}"
 fi
@@ -50,10 +56,10 @@ fi
 ZSH_SYNTAX_DIR="${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
 
 if [[ -d "${ZSH_SYNTAX_DIR}" ]]; then
-  info "zsh-syntax-highlighting already present — skipping clone."
+  info "zsh-syntax-highlighting already present -- skipping clone."
 else
   info "Cloning zsh-syntax-highlighting plugin..."
-  git clone --depth=1 \
+  run git clone --depth=1 \
     https://github.com/zsh-users/zsh-syntax-highlighting.git \
     "${ZSH_SYNTAX_DIR}"
 fi
@@ -65,10 +71,10 @@ fi
 ZSH_AUTOSUGGEST_DIR="${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
 
 if [[ -d "${ZSH_AUTOSUGGEST_DIR}" ]]; then
-  info "zsh-autosuggestions already present — skipping clone."
+  info "zsh-autosuggestions already present -- skipping clone."
 else
   info "Cloning zsh-autosuggestions plugin..."
-  git clone --depth=1 \
+  run git clone --depth=1 \
     https://github.com/zsh-users/zsh-autosuggestions.git \
     "${ZSH_AUTOSUGGEST_DIR}"
 fi

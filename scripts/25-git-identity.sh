@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/25-git-identity.sh — set the per-machine git identity.
+# scripts/25-git-identity.sh -- set the per-machine git identity.
 #
 # Runs AFTER 20-dotfiles.sh (which symlinks the tracked .gitconfig with
 # placeholder identity) and BEFORE 70-ssh.sh (which reads `git config
@@ -13,6 +13,9 @@
 # (which would hang). Instead it uses the GIT_USER_NAME / GIT_USER_EMAIL
 # environment variables if both are set, otherwise it skips with a warning and
 # leaves any existing ~/.gitconfig.local untouched.
+#
+# Dry-run mode (DRY_RUN=1): the prompt may still run so the flow is visible,
+# but nothing is written to disk.
 
 set -euo pipefail
 
@@ -25,7 +28,7 @@ GITCONFIG_LOCAL="${HOME}/.gitconfig.local"
 # git is required: it both reads the current defaults and writes the values
 # (so they are correctly escaped). Fail fast with a clear message if absent.
 if ! command_exists git; then
-  err "git not found — cannot configure git identity. Ensure 00-brew.sh ran successfully."
+  err "git not found -- cannot configure git identity. Ensure 00-brew.sh ran successfully."
   exit 1
 fi
 
@@ -62,14 +65,19 @@ write_gitconfig_local() {
 
   # Boundary guard: reject newlines/carriage returns before writing. A value
   # containing a newline could otherwise smuggle an entire extra config section
-  # (e.g. [core] sshCommand) into the file, which — because .gitconfig includes
-  # this file — would become live global config and run on the next git op.
+  # (e.g. [core] sshCommand) into the file, which -- because .gitconfig includes
+  # this file -- would become live global config and run on the next git op.
   # The interactive read -r path already stops at a newline; this guard applies
   # the same protection uniformly to the non-interactive (env var) path.
   if [[ "${name}" == *$'\n'* || "${name}" == *$'\r'* ||
     "${email}" == *$'\n'* || "${email}" == *$'\r'* ]]; then
     err "Git name/email must not contain newlines or carriage returns."
     exit 1
+  fi
+
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    info "[dry-run] would set git identity to name='${name}' email='${email}' in ${GITCONFIG_LOCAL}"
+    return 0
   fi
 
   # Let git write the values rather than hand-rendering the file. git escapes
@@ -95,7 +103,7 @@ if [[ ! -t 0 ]]; then
     info "Non-interactive: using GIT_USER_NAME / GIT_USER_EMAIL."
     write_gitconfig_local "${GIT_USER_NAME}" "${GIT_USER_EMAIL}"
   else
-    warn "Non-interactive shell and GIT_USER_NAME / GIT_USER_EMAIL not set — skipping git identity."
+    warn "Non-interactive shell and GIT_USER_NAME / GIT_USER_EMAIL not set -- skipping git identity."
     warn "Set them in ~/.gitconfig.local manually, or re-run this script from a terminal."
   fi
   info "25-git-identity: done."

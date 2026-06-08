@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# scripts/00-brew.sh — install Homebrew (if absent) and bundle selected groups.
+# scripts/00-brew.sh -- install Homebrew (if absent) and bundle selected groups.
 #
 # The Brewfile is organised into groups marked by `# group: <name>` lines.
 # This script lets you choose which groups to install rather than installing
 # everything:
 #
-#   • Interactive (a TTY on stdin): you are prompted per group. `core` defaults
+#   * Interactive (a TTY on stdin): you are prompted per group. `core` defaults
 #     to yes; every other group defaults to no.
-#   • Non-interactive (no TTY): the BREW_GROUPS env var selects groups
+#   * Non-interactive (no TTY): the BREW_GROUPS env var selects groups
 #     (space- or comma-separated). If BREW_GROUPS is unset, ALL groups are
 #     installed (so unattended/CI runs still work) with a warning.
 #
@@ -15,6 +15,12 @@
 # those groups and skips the prompts. Unknown group names are rejected.
 #
 #   BREW_GROUPS="core languages" ./install.sh
+#
+# Dry-run mode (DRY_RUN=1):
+#   Homebrew installation is skipped with a log message.
+#   Group prompts and Brewfile assembly still run so you can see what WOULD be
+#   installed; the assembled Brewfile contents are printed and brew bundle is
+#   not executed.
 
 set -euo pipefail
 
@@ -31,7 +37,9 @@ KNOWN_GROUPS=(core cloud-devops languages databases apps)
 # ---------------------------------------------------------------------------
 
 if command_exists brew; then
-  info "Homebrew already installed — skipping install."
+  info "Homebrew already installed -- skipping install."
+elif [[ "${DRY_RUN}" == "1" ]]; then
+  info "[dry-run] would install Homebrew via the official install script."
 else
   info "Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -39,6 +47,8 @@ fi
 
 # Ensure brew is on PATH for the rest of this session, regardless of arch.
 # Apple Silicon installs to /opt/homebrew; Intel installs to /usr/local.
+# Only attempt this when brew actually exists on disk -- in dry-run on a
+# machine without Homebrew there is nothing to eval.
 if ! command_exists brew; then
   if [[ -x /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -47,10 +57,16 @@ if ! command_exists brew; then
   fi
 fi
 
-# Fail fast if brew still cannot be resolved — every step below depends on it.
+# Fail fast if brew still cannot be resolved -- every step below depends on it.
+# In dry-run mode on a machine without brew we cannot proceed further, but we
+# skip the hard exit so the user sees the full preview rather than an error.
 if ! command_exists brew; then
-  err "brew is not on PATH after installation. Cannot continue."
-  exit 1
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    warn "brew not on PATH (not yet installed). Brewfile preview continues below."
+  else
+    err "brew is not on PATH after installation. Cannot continue."
+    exit 1
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -114,6 +130,7 @@ assemble_brewfile() {
     done
     [[ "${keep}" -eq 1 ]] && printf '%s\n' "${line}"
   done <"${BREWFILE}"
+  return 0
 }
 
 # Strips the leading `tap`/`brew`/`cask` keyword and the surrounding quotes
@@ -208,9 +225,9 @@ if [[ -n "${BREW_GROUPS:-}" ]]; then
   validate_groups "${SELECTED_GROUPS[@]}"
   info "Using groups from BREW_GROUPS: ${SELECTED_GROUPS[*]}"
 elif [[ ! -t 0 ]]; then
-  # Non-interactive and no explicit selection → install everything so that
+  # Non-interactive and no explicit selection -> install everything so that
   # unattended/CI runs still provision a full machine.
-  warn "Non-interactive shell and BREW_GROUPS unset — installing ALL groups."
+  warn "Non-interactive shell and BREW_GROUPS unset -- installing ALL groups."
   warn "Set BREW_GROUPS (e.g. 'core languages') to install a subset unattended."
   SELECTED_GROUPS=("${KNOWN_GROUPS[@]}")
 else
@@ -230,13 +247,13 @@ else
     fi
     case "${reply}" in
     [yY] | [yY][eE][sS]) SELECTED_GROUPS+=("${group}") ;;
-    *) : ;; # anything else → skip this group
+    *) : ;; # anything else -> skip this group
     esac
   done
 fi
 
 if [[ "${#SELECTED_GROUPS[@]}" -eq 0 ]]; then
-  warn "No groups selected — skipping brew bundle."
+  warn "No groups selected -- skipping brew bundle."
 fi
 
 # ---------------------------------------------------------------------------
@@ -251,8 +268,19 @@ if [[ "${#SELECTED_GROUPS[@]}" -gt 0 ]]; then
   assemble_brewfile "${SELECTED_GROUPS[@]}" >"${TMP_BREWFILE}"
 
   total="$(wc -l <"${TMP_BREWFILE}" | tr -d ' ')"
-  info "Installing ${total} packages across groups: ${SELECTED_GROUPS[*]}"
-  brew bundle --file="${TMP_BREWFILE}"
+
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    info "[dry-run] assembled Brewfile for groups: ${SELECTED_GROUPS[*]} (${total} lines)"
+    info "[dry-run] Brewfile contents:"
+    # Print each line with a leading indent so it is clearly attributed.
+    while IFS= read -r line; do
+      info "  ${line}"
+    done <"${TMP_BREWFILE}"
+    info "[dry-run] would run: brew bundle --file=${TMP_BREWFILE}"
+  else
+    info "Installing ${total} packages across groups: ${SELECTED_GROUPS[*]}"
+    brew bundle --file="${TMP_BREWFILE}"
+  fi
 fi
 
 info "00-brew: done."

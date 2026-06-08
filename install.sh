@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
-# install.sh — idempotent macOS bootstrap entrypoint.
+# install.sh -- idempotent macOS bootstrap entrypoint.
 #
 # Usage:
-#   ./install.sh
+#   ./install.sh [--dry-run|-n] [--help|-h]
+#
+# Options:
+#   --dry-run, -n   Preview every action without making any change to the
+#                   system. Also activated by setting DRY_RUN=1 in the
+#                   environment before running.
+#   --help,    -h   Print this usage and exit.
 #
 # Runs all numbered scripts under scripts/ in ascending numeric order.
 # Safe to re-run: every script is designed to be idempotent.
+#
+# DRY_RUN is exported so every child script inherits it automatically.
 
 set -euo pipefail
 
@@ -15,8 +23,47 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib/common.sh"
 
 # ---------------------------------------------------------------------------
+# Argument parsing
+# ---------------------------------------------------------------------------
+
+_print_usage() {
+  printf 'Usage: %s [--dry-run|-n] [--help|-h]\n\n' "$(basename "$0")"
+  printf 'Options:\n'
+  printf '  --dry-run, -n   Preview all actions without making any system change.\n'
+  printf '                  Also activated by DRY_RUN=1 in the environment.\n'
+  printf '  --help,    -h   Print this message and exit.\n'
+}
+
+for _arg in "$@"; do
+  case "${_arg}" in
+  --dry-run | -n)
+    DRY_RUN=1
+    export DRY_RUN
+    ;;
+  --help | -h)
+    _print_usage
+    exit 0
+    ;;
+  *)
+    err "Unknown option: ${_arg}"
+    _print_usage >&2
+    exit 1
+    ;;
+  esac
+done
+unset _arg
+
+# lib/common.sh already defaulted DRY_RUN to 0 if unset; the flag above
+# may have overridden it to 1.  Either way, export so child scripts inherit.
+export DRY_RUN
+
+# ---------------------------------------------------------------------------
 # Preflight checks
 # ---------------------------------------------------------------------------
+
+if [[ "${DRY_RUN}" == "1" ]]; then
+  info "DRY RUN -- no changes will be made."
+fi
 
 info "Starting macOS bootstrap from: ${SCRIPT_DIR}"
 
@@ -49,11 +96,15 @@ done
 # ---------------------------------------------------------------------------
 
 printf '\n'
-info "Bootstrap complete. All scripts ran successfully."
-info "Dotfiles are symlinked from: ${SCRIPT_DIR}/dotfiles"
-info "Backups of replaced files are in: ${HOME}/dotfiles-backup"
-info ""
-info "Next steps:"
-info "  • Vim plugins: open vim and run :PluginInstall"
-info "  • Tmux plugins: inside tmux press prefix + I"
-info "  • Add your GitHub SSH key (~/.ssh/id_ed25519_github.pub) to https://github.com/settings/keys"
+if [[ "${DRY_RUN}" == "1" ]]; then
+  info "DRY RUN complete. No changes were made."
+else
+  info "Bootstrap complete. All scripts ran successfully."
+  info "Dotfiles are symlinked from: ${SCRIPT_DIR}/dotfiles"
+  info "Backups of replaced files are in: ${HOME}/dotfiles-backup"
+  info ""
+  info "Next steps:"
+  info "  * Vim plugins: open vim and run :PluginInstall"
+  info "  * Tmux plugins: inside tmux press prefix + I"
+  info "  * Add your GitHub SSH key (~/.ssh/id_ed25519_github.pub) to https://github.com/settings/keys"
+fi

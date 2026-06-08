@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# scripts/70-ssh.sh — create a GitHub SSH key if one does not already exist.
+# scripts/70-ssh.sh -- create a GitHub SSH key if one does not already exist.
 #
 # Idempotent: if ~/.ssh/id_ed25519_github already exists the script exits early.
-# Git identity (name/email) is managed via dotfiles/.gitconfig — it is NOT
+# Git identity (name/email) is managed via dotfiles/.gitconfig -- it is NOT
 # set here to avoid coupling this script to a specific user identity.
 
 set -euo pipefail
@@ -19,7 +19,7 @@ SSH_CONFIG="${HOME}/.ssh/config"
 # ---------------------------------------------------------------------------
 
 if [[ -f "${SSH_KEY}" ]]; then
-  info "SSH key ${SSH_KEY} already exists — skipping generation."
+  info "SSH key ${SSH_KEY} already exists -- skipping generation."
   exit 0
 fi
 
@@ -45,7 +45,7 @@ fi
 
 info "Generating GitHub SSH key: ${SSH_KEY}"
 ensure_dir "${HOME}/.ssh"
-chmod 700 "${HOME}/.ssh"
+run chmod 700 "${HOME}/.ssh"
 
 # Ed25519 is the modern recommended key type: smaller, faster, and as strong
 # as RSA-4096.
@@ -54,18 +54,22 @@ chmod 700 "${HOME}/.ssh"
 # for unattended bootstrap so the run does not block on a prompt. If you
 # prefer a passphrase-protected key, remove -N "" (ssh-keygen will then prompt)
 # or supply one explicitly.
-ssh-keygen -t ed25519 -C "${KEY_COMMENT}" -f "${SSH_KEY}" -N ""
+run ssh-keygen -t ed25519 -C "${KEY_COMMENT}" -f "${SSH_KEY}" -N ""
 
 # ---------------------------------------------------------------------------
 # Start the ssh-agent and add the key
 # ---------------------------------------------------------------------------
 
-eval "$(ssh-agent -s)"
+if [[ "${DRY_RUN}" == "1" ]]; then
+  info "[dry-run] would eval \$(ssh-agent -s) and add ${SSH_KEY} to the agent."
+else
+  eval "$(ssh-agent -s)"
 
-# -K stores the passphrase in the macOS Keychain (valid for empty passphrase
-# on macOS 12+; ignored harmlessly on older versions).
-ssh-add --apple-use-keychain "${SSH_KEY}" 2>/dev/null ||
-  ssh-add "${SSH_KEY}"
+  # -K stores the passphrase in the macOS Keychain (valid for empty passphrase
+  # on macOS 12+; ignored harmlessly on older versions).
+  ssh-add --apple-use-keychain "${SSH_KEY}" 2>/dev/null ||
+    ssh-add "${SSH_KEY}"
+fi
 
 # ---------------------------------------------------------------------------
 # Append the GitHub host block to ~/.ssh/config (idempotent)
@@ -77,7 +81,9 @@ SSH_BLOCK="Host github.com
   IdentityFile ${SSH_KEY}"
 
 if grep -qF "IdentityFile ${SSH_KEY}" "${SSH_CONFIG}" 2>/dev/null; then
-  info "SSH config already contains entry for ${SSH_KEY} — skipping."
+  info "SSH config already contains entry for ${SSH_KEY} -- skipping."
+elif [[ "${DRY_RUN}" == "1" ]]; then
+  info "[dry-run] would append GitHub host block for ${SSH_KEY} to ${SSH_CONFIG}"
 else
   info "Appending GitHub host block to ${SSH_CONFIG}..."
   touch "${SSH_CONFIG}"
@@ -93,7 +99,9 @@ printf '\n'
 info "SSH key generation complete."
 info "Add the following public key to https://github.com/settings/keys:"
 printf '\n'
-cat "${SSH_KEY}.pub"
+if [[ "${DRY_RUN}" != "1" ]]; then
+  cat "${SSH_KEY}.pub"
+fi
 printf '\n'
 
 info "70-ssh: done."

@@ -50,6 +50,25 @@ chmod +x install.sh scripts/*.sh
 The run prints a coloured `[INFO] / [WARN] / [ERROR]` log to stderr and a
 summary with next steps when it completes.
 
+### Previewing changes (dry run)
+
+Run with `--dry-run` (or `-n`, or set `DRY_RUN=1` in the environment) to
+preview every action without making any change to the system:
+
+```sh
+# Flag form
+./install.sh --dry-run
+
+# Environment form (composes with BREW_GROUPS)
+DRY_RUN=1 BREW_GROUPS=core ./install.sh
+```
+
+In dry-run mode the bootstrap prints `[dry-run] would ...` lines for every
+mutating operation — symlinks, backups, Homebrew install, brew bundle (with
+the assembled Brewfile printed in full), git clones, git identity write, SSH
+keygen, and `defaults write` calls — but touches nothing on disk. A banner
+at the start and end confirms no changes were made.
+
 ---
 
 ## How it works (architecture)

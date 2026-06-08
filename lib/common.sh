@@ -3,6 +3,14 @@
 # Do not execute directly; source this file.
 
 # ---------------------------------------------------------------------------
+# Dry-run mode
+# ---------------------------------------------------------------------------
+
+# Honour DRY_RUN inherited from the environment; default to off.
+: "${DRY_RUN:=0}"
+export DRY_RUN
+
+# ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
 
@@ -18,6 +26,30 @@ warn() {
 
 err() {
   printf '\033[0;31m[ERROR]\033[0m %s\n' "$*" >&2
+}
+
+# ---------------------------------------------------------------------------
+# run — mutating-command wrapper
+# ---------------------------------------------------------------------------
+
+# run <command> [<args>...]
+#
+# When DRY_RUN=1: prints what would be executed and returns 0 without running.
+# When DRY_RUN=0: executes the command exactly as supplied.
+#
+# Use this for every mutating shell call (git clone, keygen, defaults write,
+# brew bundle, etc.).  Read-only commands (command_exists, brew --version,
+# pyenv versions --bare, grep, find ...) may be called directly.
+run() {
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    # Render each argument safely with printf %q so spaces and special
+    # characters are visible and unambiguous.
+    local rendered
+    rendered="$(printf '%q ' "$@")"
+    info "[dry-run] would run: ${rendered% }"
+    return 0
+  fi
+  "$@"
 }
 
 # ---------------------------------------------------------------------------
@@ -53,8 +85,10 @@ repo_root() {
 ensure_dir() {
   local dir="$1"
   if [[ ! -d "${dir}" ]]; then
-    mkdir -p "${dir}"
-    info "Created directory: ${dir}"
+    run mkdir -p "${dir}"
+    if [[ "${DRY_RUN}" != "1" ]]; then
+      info "Created directory: ${dir}"
+    fi
   fi
 }
 
@@ -68,10 +102,12 @@ ensure_dir() {
 #
 # Behaviour:
 #   1. Ensures the target's parent directory exists.
-#   2. If target already exists and is already a correct symlink to src → no-op.
-#   3. If target exists (file, wrong symlink, or directory) → backs it up to
+#   2. If target already exists and is already a correct symlink to src -> no-op.
+#   3. If target exists (file, wrong symlink, or directory) -> backs it up to
 #      ~/dotfiles-backup/<basename>.<timestamp> then removes the original.
 #   4. Creates the symlink: ln -sfn src target.
+#
+# In dry-run mode: logs what would happen and makes no filesystem changes.
 backup_then_symlink() {
   local src="$1"
   local target="$2"
@@ -90,27 +126,36 @@ backup_then_symlink() {
 
   # If target is already the correct symlink, nothing to do.
   if [[ -L "${target}" ]] && [[ "$(readlink "${target}")" == "${src}" ]]; then
-    info "Already linked: ${target} → ${src}"
+    info "Already linked: ${target} -> ${src}"
     return 0
   fi
 
-  # If anything already occupies the target path, back it up.
+  # If anything already occupies the target path, log the backup intent.
   if [[ -e "${target}" ]] || [[ -L "${target}" ]]; then
-    ensure_dir "${backup_dir}"
     local basename
     basename="$(basename "${target}")"
-    # The timestamp has only second resolution, so two same-named files backed
-    # up in the same second would collide. Append PID + a random suffix, and
-    # loop on the off-chance the path still exists, so no backup is clobbered.
     local backup_path
     backup_path="${backup_dir}/${basename}.${timestamp}.$$.${RANDOM}"
-    while [[ -e "${backup_path}" ]]; do
-      backup_path="${backup_dir}/${basename}.${timestamp}.$$.${RANDOM}"
-    done
-    warn "Backing up existing ${target} → ${backup_path}"
-    mv "${target}" "${backup_path}"
+
+    if [[ "${DRY_RUN}" == "1" ]]; then
+      info "[dry-run] would back up ${target} -> ${backup_path}"
+    else
+      ensure_dir "${backup_dir}"
+      # The timestamp has only second resolution, so two same-named files backed
+      # up in the same second would collide. Append PID + a random suffix, and
+      # loop on the off-chance the path still exists, so no backup is clobbered.
+      while [[ -e "${backup_path}" ]]; do
+        backup_path="${backup_dir}/${basename}.${timestamp}.$$.${RANDOM}"
+      done
+      warn "Backing up existing ${target} -> ${backup_path}"
+      mv "${target}" "${backup_path}"
+    fi
   fi
 
-  ln -sfn "${src}" "${target}"
-  info "Linked: ${target} → ${src}"
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    info "[dry-run] would link ${target} -> ${src}"
+  else
+    ln -sfn "${src}" "${target}"
+    info "Linked: ${target} -> ${src}"
+  fi
 }

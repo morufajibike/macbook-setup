@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/50-python.sh — install a pinned Python version via pyenv.
+# scripts/50-python.sh -- install a pinned Python version via pyenv.
 #
 # pyenv itself is installed by Homebrew (00-brew.sh).  This script installs
 # the pinned application-level Python version and sets it as the global
@@ -36,10 +36,10 @@ fi
 # ---------------------------------------------------------------------------
 
 if pyenv versions --bare | grep -qxF "${PYTHON_VERSION}"; then
-  info "Python ${PYTHON_VERSION} already installed via pyenv — skipping."
+  info "Python ${PYTHON_VERSION} already installed via pyenv -- skipping."
 else
   info "Installing Python ${PYTHON_VERSION} via pyenv..."
-  pyenv install "${PYTHON_VERSION}"
+  run pyenv install "${PYTHON_VERSION}"
 fi
 
 # ---------------------------------------------------------------------------
@@ -49,10 +49,10 @@ fi
 CURRENT_GLOBAL="$(pyenv global)"
 
 if [[ "${CURRENT_GLOBAL}" == "${PYTHON_VERSION}" ]]; then
-  info "pyenv global is already ${PYTHON_VERSION} — no change."
+  info "pyenv global is already ${PYTHON_VERSION} -- no change."
 else
   info "Setting pyenv global to ${PYTHON_VERSION}..."
-  pyenv global "${PYTHON_VERSION}"
+  run pyenv global "${PYTHON_VERSION}"
 fi
 
 # ---------------------------------------------------------------------------
@@ -61,7 +61,7 @@ fi
 
 info "Installing common pip packages..."
 # Use the pyenv-managed pip to avoid polluting the system Python.
-"$(pyenv root)/versions/${PYTHON_VERSION}/bin/pip" install --upgrade \
+run "$(pyenv root)/versions/${PYTHON_VERSION}/bin/pip" install --upgrade \
   flake8 \
   ipython \
   pytest
