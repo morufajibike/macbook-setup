@@ -45,17 +45,11 @@ else
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-# Ensure brew is on PATH for the rest of this session, regardless of arch.
-# Apple Silicon installs to /opt/homebrew; Intel installs to /usr/local.
-# Only attempt this when brew actually exists on disk -- in dry-run on a
-# machine without Homebrew there is nothing to eval.
-if ! command_exists brew; then
-  if [[ -x /opt/homebrew/bin/brew ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [[ -x /usr/local/bin/brew ]]; then
-    eval "$(/usr/local/bin/brew shellenv)"
-  fi
-fi
+# Ensure brew is on PATH for the rest of this session.  common.sh already
+# calls ensure_brew_on_path() at source time, but if Homebrew was just
+# installed in the block above it was not yet on disk when common.sh ran.
+# Calling it again here picks up a freshly installed brew within this process.
+ensure_brew_on_path
 
 # Fail fast if brew still cannot be resolved -- every step below depends on it.
 # In dry-run mode on a machine without brew we cannot proceed further, but we

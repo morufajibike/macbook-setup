@@ -27,7 +27,11 @@ PYTHON_VERSION="3.9.6"
 # ---------------------------------------------------------------------------
 
 if ! command_exists pyenv; then
-  err "pyenv not found. Ensure 00-brew.sh ran successfully."
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    info "[dry-run] pyenv is not installed yet (00-brew would install it); skipping Python setup preview."
+    exit 0
+  fi
+  err "pyenv not found. Ensure 00-brew.sh ran and its packages are on PATH."
   exit 1
 fi
 
