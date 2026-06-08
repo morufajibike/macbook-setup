@@ -1,152 +1,110 @@
-
-#### FIG ENV VARIABLES ####
-# Please make sure this block is at the start of this file.
-[ -s ~/.fig/shell/pre.sh ] && source ~/.fig/shell/pre.sh
-#### END FIG ENV VARIABLES ####
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
+# Enable powerlevel10k instant prompt. Keep this block at the very top so it
+# runs before anything that produces output; otherwise the instant prompt is
+# disabled with a warning. Console output during init must stay above this.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
-# Custom skip the verification of insecure directories
+# Skip verification of insecure completion directories.
 ZSH_DISABLE_COMPFIX="true"
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
+# Theme: powerlevel10k.
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
-# ZSH_THEME="agnoster"
-ZSH_THEME="powerlevel9k/powerlevel9k"
-POWERLEVEL9K_MODE="nerdfont-complete"
+# Plugins — keep this list lean; slow plugins degrade shell start time.
+plugins=(git autopep8 pep8 aws tmux zsh-syntax-highlighting zsh-autosuggestions)
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+source "$ZSH/oh-my-zsh.sh"
 
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
+# ---------------------------------------------------------------------------
+# PATH additions
+# ---------------------------------------------------------------------------
 
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
+# Resolve the Homebrew prefix (Apple Silicon: /opt/homebrew, Intel: /usr/local)
+# without spawning brew, so per-arch paths below are not hardcoded.
+if [ -n "${HOMEBREW_PREFIX:-}" ]; then
+  BREW_PREFIX="${HOMEBREW_PREFIX}"
+elif [ -x /opt/homebrew/bin/brew ]; then
+  BREW_PREFIX="/opt/homebrew"
+elif [ -x /usr/local/bin/brew ]; then
+  BREW_PREFIX="/usr/local"
+else
+  BREW_PREFIX=""
+fi
 
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
+# OpenSSL (1.1 required by some Python packages and older tooling).
+# Guarded so dead paths are not added when the formula is absent.
+if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/openssl@1.1" ]; then
+  export PATH="${BREW_PREFIX}/opt/openssl@1.1/bin:$PATH"
+  export LDFLAGS="-L${BREW_PREFIX}/opt/openssl@1.1/lib"
+  export CPPFLAGS="-I${BREW_PREFIX}/opt/openssl@1.1/include"
+fi
 
-# Uncomment the following line to automatically update without prompting.
-# DISABLE_UPDATE_PROMPT="true"
+# OpenSSL (legacy path used by some tools).
+if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/openssl" ]; then
+  export PATH="${BREW_PREFIX}/opt/openssl/bin:$PATH"
+  export DYLD_LIBRARY_PATH="${BREW_PREFIX}/opt/openssl/lib:${DYLD_LIBRARY_PATH:-}"
+fi
 
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
+# MySQL client (for building Python/Ruby MySQL extensions).
+if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/mysql-client" ]; then
+  export PATH="${BREW_PREFIX}/opt/mysql-client/bin:$PATH"
+  export PKG_CONFIG_PATH="${BREW_PREFIX}/opt/mysql-client/lib/pkgconfig"
+fi
 
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS=true
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in ~/.oh-my-zsh/plugins/*
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(git autopep8 pep8 aws tmux zsh-syntax-highlighting zsh-autosuggestions dnf)
-
-source $ZSH/oh-my-zsh.sh
-
-# User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
-# tabtab source for serverless package
-# uninstall by removing these lines or running `tabtab uninstall serverless`
-[[ -f /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.zsh ]] && . /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.zsh
-# tabtab source for sls package
-# uninstall by removing these lines or running `tabtab uninstall sls`
-[[ -f /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.zsh ]] && . /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.zsh
-# tabtab source for slss package
-# uninstall by removing these lines or running `tabtab uninstall slss`
-[[ -f /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/slss.zsh ]] && . /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/slss.zsh
-export PATH="/usr/local/opt/openssl/bin:$PATH"
-export PATH="/usr/local/opt/openssl/bin:$PATH"
-
-export DYLD_LIBRARY_PATH=/usr/local/opt/openssl/lib:$DYLD_LIBRARY_PATH
-
-# load bash_profile
-[ -f ~/.bash_profile ] && source ~/.bash_profile
-
-# load fzf
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-# We want to load pyenv every time we open a new shell
-if which pyenv > /dev/null; then eval "$(pyenv init -)"; fi
-
-export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
-export PATH="/usr/local/opt/mysql-client/bin:$PATH"
-export LDFLAGS="-L/usr/local/opt/mysql-client/lib"
-export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
-export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
-
-# java
-export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
+# Java 11 (via Homebrew openjdk@11).
+if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/openjdk@11" ]; then
+  export PATH="${BREW_PREFIX}/opt/openjdk@11/bin:$PATH"
+fi
 export PATH="$PATH:/usr/bin/java"
-export JAVA_HOME=$(/usr/libexec/java_home)
+export JAVA_HOME=$(/usr/libexec/java_home 2>/dev/null || true)
 
-# flutter
-export PATH="$PATH:/Users/morufajibike/Documents/Personal/flutter/flutter/bin"
+# ---------------------------------------------------------------------------
+# Tools
+# ---------------------------------------------------------------------------
 
-#### FIG ENV VARIABLES ####
-# Please make sure this block is at the end of this file.
-[ -s ~/.fig/fig.sh ] && source ~/.fig/fig.sh
-#### END FIG ENV VARIABLES ####
+# pyenv — initialise every new shell so the shims are on PATH.
+if command -v pyenv >/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
+
+# NVM — Node Version Manager.
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ]             && source "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ]    && source "$NVM_DIR/bash_completion"
+
+# Rust / cargo environment (installed by rustup).
+[ -f "$HOME/.local/bin/env" ] && source "$HOME/.local/bin/env"
+
+# ---------------------------------------------------------------------------
+# Aliases and shell additions
+# ---------------------------------------------------------------------------
+
+alias k=kubectl
+
+# Shared aliases and functions (git shortcuts, project helpers, etc.).
+source ~/.bash_additions
+
+# ---------------------------------------------------------------------------
+# Claude Code tmux wrapper
+# ---------------------------------------------------------------------------
+# Always start Claude Code inside a tmux session so agent teams render in
+# split panes. CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 (set in
+# ~/.claude/settings.json) spawns each teammate in its own tmux pane, but
+# only when Claude is launched from inside a tmux client. This wrapper
+# enforces that: outside tmux it creates/attaches to a session named
+# `claude` and runs `claude` inside it; inside tmux it runs claude normally.
+claude() {
+  if [[ -z "$TMUX" ]]; then
+    command tmux new-session -A -s claude "command claude $*"
+  else
+    command claude "$@"
+  fi
+}
+
+# powerlevel10k prompt configuration. If ~/.p10k.zsh is absent, p10k runs its
+# interactive `p10k configure` wizard automatically on first shell launch.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

@@ -1,34 +1,36 @@
+# ~/.bashrc — sourced for interactive bash shells.
 
-#### FIG ENV VARIABLES ####
-# Please make sure this block is at the start of this file.
-[ -s ~/.fig/shell/pre.sh ] && source ~/.fig/shell/pre.sh
-#### END FIG ENV VARIABLES ####
+# Shared aliases and functions.
+source ~/.bash_additions
 
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-# Add github private key for SSH connections
-ssh-add -K ~/.ssh/id_rsa_github
-
-# The next line updates PATH for the Google Cloud SDK.
-# if [ -f '/Users/kurtpeek/Downloads/google-cloud-sdk/path.bash.inc' ]; then
-#  source '/Users/kurtpeek/Downloads/google-cloud-sdk/path.bash.inc';
-# fi
-
-# The next line enables shell command completion for gcloud.
-#if [ -f '/Users/kurtpeek/Downloads/google-cloud-sdk/completion.bash.inc' ]; then
-#  source '/Users/kurtpeek/Downloads/google-cloud-sdk/completion.bash.inc';
-#fi
-
-#pyenv
+# pyenv initialisation.
 export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+if command -v pyenv >/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
+fi
 
-[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+# Resolve the Homebrew prefix (Apple Silicon: /opt/homebrew, Intel: /usr/local)
+# without spawning brew, so the per-arch path below is not hardcoded.
+if [ -n "${HOMEBREW_PREFIX:-}" ]; then
+  BREW_PREFIX="${HOMEBREW_PREFIX}"
+elif [ -x /opt/homebrew/bin/brew ]; then
+  BREW_PREFIX="/opt/homebrew"
+elif [ -x /usr/local/bin/brew ]; then
+  BREW_PREFIX="/usr/local"
+else
+  BREW_PREFIX=""
+fi
 
-source <(kubectl completion bash)
+# Bash completion (Homebrew).
+[ -n "${BREW_PREFIX}" ] \
+  && [ -r "${BREW_PREFIX}/etc/profile.d/bash_completion.sh" ] \
+  && source "${BREW_PREFIX}/etc/profile.d/bash_completion.sh"
 
-#### FIG ENV VARIABLES ####
-# Please make sure this block is at the end of this file.
-[ -s ~/.fig/fig.sh ] && source ~/.fig/fig.sh
-#### END FIG ENV VARIABLES ####
+# kubectl bash completion.
+if command -v kubectl >/dev/null 2>&1; then
+  source <(kubectl completion bash)
+fi
+
+# Rust / cargo environment.
+[ -f "$HOME/.local/bin/env" ] && source "$HOME/.local/bin/env"

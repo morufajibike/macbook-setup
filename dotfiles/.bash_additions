@@ -1,0 +1,22 @@
+# ~/.bash_additions — shared aliases and helpers sourced by both .zshrc and .bashrc.
+
+# ---------------------------------------------------------------------------
+# Project helpers
+# ---------------------------------------------------------------------------
+
+alias tf_helper="~/Code/projects/petsathome/tf-helper.sh"
+alias tf_tester="~/Code/projects/petsathome/tf-test.sh"
+
+# ---------------------------------------------------------------------------
+# Git shortcuts
+# ---------------------------------------------------------------------------
+
+alias ga="git add ."
+alias gs="git status"
+alias gsw="git switch"
+# gsh — show a specific commit (renamed from the duplicate gs="git show").
+alias gsh="git show"
+alias gl="git log --oneline"
+alias gcom="git commit -m"
+alias gca="git commit --amend"
+alias gcb="git checkout -b"
