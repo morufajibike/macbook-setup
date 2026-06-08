@@ -6,15 +6,19 @@
 # everything:
 #
 #   * Interactive (a TTY on stdin): you are prompted per group. `core` defaults
-#     to yes; every other group defaults to no.
+#     to yes; every other default group defaults to no.
 #   * Non-interactive (no TTY): the BREW_GROUPS env var selects groups
-#     (space- or comma-separated). If BREW_GROUPS is unset, ALL groups are
-#     installed (so unattended/CI runs still work) with a warning.
+#     (space- or comma-separated). If BREW_GROUPS is unset, the default groups
+#     are installed (so unattended/CI runs still work) with a warning.
 #
 # BREW_GROUPS is also honoured on the interactive path: when set it pre-selects
 # those groups and skips the prompts. Unknown group names are rejected.
 #
 #   BREW_GROUPS="core languages" ./install.sh
+#
+# The `apps` group (GUI casks) is OPT-IN: it is excluded from the default
+# selection in every mode and is installed only when one of the following is
+# given: the --with-apps flag (INSTALL_APPS=1), or BREW_GROUPS naming `apps`.
 #
 # Dry-run mode (DRY_RUN=1):
 #   Homebrew installation is skipped with a log message.
@@ -29,8 +33,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../lib/common.sh"
 
 # Known groups, in the order they are prompted / assembled. This is the single
-# source of truth for valid group names.
+# source of truth for valid group names. BREW_GROUPS validation accepts any of
+# these, including apps.
 KNOWN_GROUPS=(core cloud-devops languages databases apps)
+
+# Groups selected by default (interactive prompts and the unattended fallback).
+# apps is deliberately excluded -- it is opt-in only (see INSTALL_APPS below).
+DEFAULT_GROUPS=(core cloud-devops languages databases)
+
+# apps is opt-in. Default to 0 when unset so `set -u` references are safe.
+: "${INSTALL_APPS:=0}"
 
 # ---------------------------------------------------------------------------
 # Install Homebrew
@@ -219,16 +231,16 @@ if [[ -n "${BREW_GROUPS:-}" ]]; then
   validate_groups "${SELECTED_GROUPS[@]}"
   info "Using groups from BREW_GROUPS: ${SELECTED_GROUPS[*]}"
 elif [[ ! -t 0 ]]; then
-  # Non-interactive and no explicit selection -> install everything so that
-  # unattended/CI runs still provision a full machine.
-  warn "Non-interactive shell and BREW_GROUPS unset -- installing ALL groups."
-  warn "Set BREW_GROUPS (e.g. 'core languages') to install a subset unattended."
-  SELECTED_GROUPS=("${KNOWN_GROUPS[@]}")
+  # Non-interactive and no explicit selection -> install the default groups so
+  # that unattended/CI runs still provision a machine. apps is excluded.
+  warn "Non-interactive shell and BREW_GROUPS unset -- installing default groups."
+  warn "Pass --with-apps to include GUI apps, or set BREW_GROUPS (e.g. 'core languages')."
+  SELECTED_GROUPS=("${DEFAULT_GROUPS[@]}")
 else
   # Interactive: show each group's contents, then prompt. core defaults to yes;
-  # the rest default to no.
+  # the rest default to no. apps is not prompted -- it is opt-in via --with-apps.
   info "Choose which Homebrew groups to install."
-  for group in "${KNOWN_GROUPS[@]}"; do
+  for group in "${DEFAULT_GROUPS[@]}"; do
     count="$(count_group_entries "${group}")"
     printf '\nGroup '\''%s'\'' (%s packages):\n' "${group}" "${count}"
     list_group_entries "${group}"
@@ -246,6 +258,23 @@ else
   done
 fi
 
+# --with-apps (INSTALL_APPS=1) guarantees the GUI apps group is included,
+# regardless of how the other groups were selected. apps is never installed
+# automatically otherwise.
+if [[ "${INSTALL_APPS}" == "1" ]]; then
+  if [[ "${#SELECTED_GROUPS[@]}" -eq 0 ]] ||
+    ! printf '%s\n' "${SELECTED_GROUPS[@]}" | grep -qxF apps; then
+    SELECTED_GROUPS+=(apps)
+  fi
+  info "Including 'apps' group (GUI casks) via --with-apps."
+fi
+
+# Tell the user how to get apps if it was not selected on any path.
+if [[ "${#SELECTED_GROUPS[@]}" -eq 0 ]] ||
+  ! printf '%s\n' "${SELECTED_GROUPS[@]}" | grep -qxF apps; then
+  info "Skipping 'apps' group (GUI casks) -- pass --with-apps or BREW_GROUPS=...,apps to install it."
+fi
+
 if [[ "${#SELECTED_GROUPS[@]}" -eq 0 ]]; then
   warn "No groups selected -- skipping brew bundle."
 fi
@@ -259,9 +288,16 @@ if [[ "${#SELECTED_GROUPS[@]}" -gt 0 ]]; then
   # Ensure the temp file is removed on any exit path.
   trap 'rm -f "${TMP_BREWFILE}"' EXIT
 
-  assemble_brewfile "${SELECTED_GROUPS[@]}" >"${TMP_BREWFILE}"
+  # Prepend `cask_args adopt: true` so an app already present on disk (e.g.
+  # installed outside Homebrew) is adopted rather than reinstalled. Combined
+  # with --no-upgrade this stops re-runs from touching apps you already have.
+  {
+    printf 'cask_args adopt: true\n'
+    assemble_brewfile "${SELECTED_GROUPS[@]}"
+  } >"${TMP_BREWFILE}"
 
-  total="$(wc -l <"${TMP_BREWFILE}" | tr -d ' ')"
+  # Count only install entries; the cask_args directive is not a package.
+  total="$(grep -cE '^(tap|brew|cask) ' "${TMP_BREWFILE}" || true)"
 
   if [[ "${DRY_RUN}" == "1" ]]; then
     info "[dry-run] assembled Brewfile for groups: ${SELECTED_GROUPS[*]} (${total} lines)"
@@ -270,10 +306,13 @@ if [[ "${#SELECTED_GROUPS[@]}" -gt 0 ]]; then
     while IFS= read -r line; do
       info "  ${line}"
     done <"${TMP_BREWFILE}"
-    info "[dry-run] would run: brew bundle --file=${TMP_BREWFILE}"
+    info "[dry-run] would run: brew bundle install --no-upgrade --file=${TMP_BREWFILE}"
   else
     info "Installing ${total} packages across groups: ${SELECTED_GROUPS[*]}"
-    brew bundle --file="${TMP_BREWFILE}"
+    # brew bundle upgrades by default, which reinstalls already-installed packages
+    # (notably auto_updates casks like adobe-acrobat-reader) on every run.
+    # --no-upgrade makes re-runs install only what's missing, keeping runs idempotent.
+    brew bundle install --no-upgrade --file="${TMP_BREWFILE}"
   fi
 fi
 

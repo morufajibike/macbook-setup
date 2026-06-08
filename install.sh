@@ -2,9 +2,11 @@
 # install.sh -- idempotent macOS bootstrap entrypoint.
 #
 # Usage:
-#   ./install.sh [--dry-run|-n] [--help|-h]
+#   ./install.sh [--with-apps] [--dry-run|-n] [--help|-h]
 #
 # Options:
+#   --with-apps     Also install the apps group (GUI casks). Skipped by default.
+#                   Also activated by setting INSTALL_APPS=1 in the environment.
 #   --dry-run, -n   Preview every action without making any change to the
 #                   system. Also activated by setting DRY_RUN=1 in the
 #                   environment before running.
@@ -13,7 +15,7 @@
 # Runs all numbered scripts under scripts/ in ascending numeric order.
 # Safe to re-run: every script is designed to be idempotent.
 #
-# DRY_RUN is exported so every child script inherits it automatically.
+# DRY_RUN and INSTALL_APPS are exported so every child script inherits them.
 
 set -euo pipefail
 
@@ -27,8 +29,10 @@ source "${SCRIPT_DIR}/lib/common.sh"
 # ---------------------------------------------------------------------------
 
 _print_usage() {
-  printf 'Usage: %s [--dry-run|-n] [--help|-h]\n\n' "$(basename "$0")"
+  printf 'Usage: %s [--with-apps] [--dry-run|-n] [--help|-h]\n\n' "$(basename "$0")"
   printf 'Options:\n'
+  printf '  --with-apps     Also install the apps group (GUI casks). Skipped by default.\n'
+  printf '                  Also activated by INSTALL_APPS=1 in the environment.\n'
   printf '  --dry-run, -n   Preview all actions without making any system change.\n'
   printf '                  Also activated by DRY_RUN=1 in the environment.\n'
   printf '  --help,    -h   Print this message and exit.\n'
@@ -36,6 +40,10 @@ _print_usage() {
 
 for _arg in "$@"; do
   case "${_arg}" in
+  --with-apps)
+    INSTALL_APPS=1
+    export INSTALL_APPS
+    ;;
   --dry-run | -n)
     DRY_RUN=1
     export DRY_RUN
@@ -56,6 +64,11 @@ unset _arg
 # lib/common.sh already defaulted DRY_RUN to 0 if unset; the flag above
 # may have overridden it to 1.  Either way, export so child scripts inherit.
 export DRY_RUN
+
+# apps is opt-in: default INSTALL_APPS to 0 when unset, then export so child
+# scripts inherit it even when the flag/env var was not provided.
+: "${INSTALL_APPS:=0}"
+export INSTALL_APPS
 
 # ---------------------------------------------------------------------------
 # Preflight checks

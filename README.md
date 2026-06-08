@@ -50,6 +50,21 @@ chmod +x install.sh scripts/*.sh
 The run prints a coloured `[INFO] / [WARN] / [ERROR]` log to stderr and a
 summary with next steps when it completes.
 
+### Installing the GUI apps
+
+The `apps` group (GUI casks) is **opt-in** and skipped by default in every
+mode. Pass `--with-apps` (or set `INSTALL_APPS=1`) to include it:
+
+```sh
+# Flag form
+./install.sh --with-apps
+
+# Environment form
+INSTALL_APPS=1 ./install.sh
+```
+
+You can also name `apps` explicitly in `BREW_GROUPS` (see below).
+
 ### Previewing changes (dry run)
 
 Run with `--dry-run` (or `-n`, or set `DRY_RUN=1` in the environment) to
@@ -115,16 +130,21 @@ assembles a temporary Brewfile from only the selected groups before calling
 | Group | Default | Roughly contains |
 |---|---|---|
 | `core` | **yes** | Shell and git essentials, plus the prompt font: `zsh`, `bash-completion`, `git-lfs`, `gh`, `tmux`, `bat`, `coreutils`, `gawk`, `jq`, `tree`, `wget`, `pre-commit`, and the `font-meslo-lg-nerd-font` cask. |
-| `cloud-devops` | no | Cloud and container tooling: `awscli`, `azure-cli`, `ansible`, `docker`/`docker-compose`, `colima`, `helm`, `minikube`, `k9s`, `stern`, `argocd`, and Terraform tooling (`tfenv`, `terragrunt`, `tflint`, `tfsort`, `terraform-docs`, `checkov`, `infracost`, `trivy`, `actionlint`). |
-| `languages` | no | Runtimes and toolchains: `node`, `python@3.10`, `pyenv`, `pipenv`, `uv`, `ipython`, `openjdk@11`, `openssl@1.1`. |
+| `cloud-devops` | no | Cloud and container tooling: `awscli`, `azure-cli`, `ansible`, `docker`/`docker-compose`, `colima`, `helm`, `minikube`, `k9s`, `stern`, `argocd`, and Terraform tooling (`tfenv`, `terragrunt`, `tfsort`, `terraform-docs`, `checkov`, `infracost`, `trivy`, `actionlint`). |
+| `languages` | no | Runtimes and toolchains: `node`, `python@3.10`, `pyenv`, `pipenv`, `uv`, `ipython`. |
 | `databases` | no | `mysql`, `postgresql@17`. |
-| `apps` | no | GUI casks: `ghostty`, `visual-studio-code`, `google-chrome`, `firefox`, `docker`, `dropbox`, `flux`, `adobe-acrobat-reader`. |
+| `apps` | no — opt-in via `--with-apps` | GUI casks: `ghostty`, `visual-studio-code`, `google-chrome`, `firefox`, `docker`, `flux`, `adobe-acrobat-reader`. |
 
 ### Choosing groups
 
 **Interactive (a terminal on stdin):** you are prompted per group. `core`
 defaults to yes (`[Y/n]`); every other group defaults to no (`[y/N]`), so a
 fresh machine installs only what you pick.
+
+The `apps` group is excluded from the defaults in **all** modes (interactive
+prompts, the non-interactive fallback, and dry-run) and is never prompted for.
+It is installed only via `--with-apps`, `INSTALL_APPS=1`, or by naming `apps`
+explicitly in `BREW_GROUPS`.
 
 **`BREW_GROUPS` override** (space- or comma-separated) pre-selects groups and
 skips the prompts on both interactive and non-interactive runs:
@@ -141,12 +161,15 @@ Behaviour summary:
 
 | Situation | Result |
 |---|---|
-| `BREW_GROUPS` set | Installs exactly those groups (prompts skipped). |
-| Interactive, `BREW_GROUPS` unset | Prompts per group (`core` defaults yes, rest no). |
-| Non-interactive, `BREW_GROUPS` unset (CI, piped input) | Installs **all** groups, with a warning, so unattended provisioning still works. |
+| `BREW_GROUPS` set | Installs exactly those groups (prompts skipped); may include `apps`. |
+| Interactive, `BREW_GROUPS` unset | Prompts per default group (`core` defaults yes, rest no); `apps` is not prompted. |
+| Non-interactive, `BREW_GROUPS` unset (CI, piped input) | Installs the default groups (everything except `apps`), with a warning, so unattended provisioning still works. |
+| `--with-apps` / `INSTALL_APPS=1` | Adds `apps` to the selection on any path above. |
 | Unknown group name | Rejected with an error listing the valid groups. |
 
 `brew bundle` is idempotent: re-running only installs whatever is missing.
+Already-installed packages are skipped (`--no-upgrade`), and apps already
+present on disk are adopted rather than reinstalled (`cask_args adopt: true`).
 
 > **Caveat on refreshing the Brewfile.** `brew bundle dump` does **not**
 > preserve the `# group:` markers. After a dump you must re-add the markers and
@@ -168,7 +191,7 @@ idempotent.
 | `25-git-identity.sh` | Sets the per-machine git identity. Prompts for name/email (or reads `GIT_USER_NAME`/`GIT_USER_EMAIL`, or skips on a non-TTY) and writes them to the untracked `~/.gitconfig.local`. |
 | `30-vim.sh` | Clones Vundle if absent, then runs `vim -u ~/.vimrc +PluginInstall +qall` to install the plugins declared in `.vimrc`. |
 | `40-tmux.sh` | Clones TPM if absent, then runs `tpm/bin/install_plugins` to install the plugins declared in `.tmux.conf`. |
-| `50-python.sh` | Installs the pinned Python version (`3.9.6`) via pyenv and sets it as the global default, then installs `flake8`, `ipython`, and `pytest` into that version's pip. |
+| `50-python.sh` | Installs the pinned Python version (`3.13.11`) via pyenv and sets it as the global default, then installs `flake8`, `ipython`, and `pytest` into that version's pip. |
 | `60-fonts.sh` | Installs fonts not available as Homebrew casks: FiraCode and Powerline fonts into `~/Library/Fonts`. Clones the Operator Mono ligature builder and builds it only if you supply the original OTF files in `.fonts-work/operator-mono-lig/original/`. |
 | `70-ssh.sh` | Generates an Ed25519 GitHub SSH key at `~/.ssh/id_ed25519_github`, adds it to the agent/keychain, appends a `github.com` host block to `~/.ssh/config`, and prints the public key. Skipped entirely if the key already exists. |
 | `80-macos.sh` | Applies a curated set of reversible `defaults write` system settings, then restarts Finder/Dock/SystemUIServer. |
@@ -186,7 +209,7 @@ Every file below is symlinked from `dotfiles/` into `$HOME`.
 
 | Dotfile | Manages |
 |---|---|
-| `.zshrc` | oh-my-zsh with the powerlevel10k theme and plugins (`git`, `autopep8`, `pep8`, `aws`, `tmux`, `zsh-syntax-highlighting`, `zsh-autosuggestions`); pyenv init; NVM; arch-aware OpenSSL/MySQL/Java PATH entries; the `k=kubectl` alias; sources `~/.bash_additions`; the powerlevel10k instant-prompt block; and the `claude` tmux wrapper (see below). |
+| `.zshrc` | oh-my-zsh with the powerlevel10k theme and plugins (`git`, `autopep8`, `pep8`, `aws`, `tmux`, `zsh-syntax-highlighting`, `zsh-autosuggestions`); pyenv init; NVM; arch-aware MySQL client and system Java PATH entries; the `k=kubectl` alias; sources `~/.bash_additions`; the powerlevel10k instant-prompt block; and the `claude` tmux wrapper (see below). |
 | `.vimrc` | Vundle-managed plugins — NERDTree, `vim-flake8`, `vim-airline`, SimpylFold, and `copilot.vim` — plus indent/fold settings, `Ctrl-t` to toggle NERDTree, and flake8 on save for `*.py`. |
 | `.tmux.conf` | TPM plugins (`tpm`, `tmux-sensible`, `nord-tmux`, `tmux-resurrect`, `tmux-colors-solarized`, `tmux-sessionx`); top status bar; vi-style keys; pane navigation/splitting; large scrollback; status-line styling. |
 | `.bashrc` | Interactive bash setup: sources `~/.bash_additions`, pyenv init, Homebrew and kubectl completion, Rust/cargo env. |
@@ -286,7 +309,8 @@ of `scripts/50-python.sh`.
 `./install.sh` is safe to re-run at any time:
 
 - Homebrew install is skipped (already present); `brew bundle` installs only
-  what is missing.
+  what is missing — already-installed packages are skipped and apps already
+  present on disk are adopted rather than reinstalled.
 - oh-my-zsh, theme, plugin, Vundle, TPM, and font clones are skipped if their
   directories already exist.
 - Symlinks that already point to the right source are left alone.

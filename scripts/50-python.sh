@@ -15,12 +15,12 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 # The Python version to pin.  Change here to update the whole machine.
 #
 # NOTE: `pyenv install` compiles CPython from source and therefore needs the
-# build dependencies present (openssl, readline, xz, zlib, etc.). These come
-# from the Brewfile (openssl@1.1) plus the Xcode Command Line Tools. Building
-# an older release such as 3.9.6 can fail on a modern toolchain (newer clang
-# or OpenSSL 3.x). If `pyenv install` fails on a fresh machine, bump this
-# pinned version to a release that builds cleanly on the current toolchain.
-PYTHON_VERSION="3.9.6"
+# build dependencies present (openssl, readline, xz, zlib, etc.) plus the Xcode
+# Command Line Tools. A modern Python builds cleanly against the OpenSSL that
+# Homebrew pulls in as a dependency (openssl@3). If `pyenv install` fails on a
+# fresh machine, bump this pinned version to a release that builds cleanly on
+# the current toolchain.
+PYTHON_VERSION="3.13.11"
 
 # ---------------------------------------------------------------------------
 # Ensure pyenv is available
