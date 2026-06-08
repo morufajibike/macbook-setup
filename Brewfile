@@ -18,8 +18,9 @@
 # dump you must re-add them (and re-sort entries into the right groups) by hand
 # before committing, or scripts/00-brew.sh's grouping will be lost.
 #
-# Taps note: homebrew/cask-versions is deliberately excluded — it was
-# deprecated in 2024 and its versioned casks were migrated into homebrew/cask.
+# No third-party taps are required — all formulae below are in homebrew-core
+# or homebrew-cask. (homebrew/cask-versions is also excluded — it was
+# deprecated in 2024 and its versioned casks were migrated into homebrew/cask.)
 #
 # Casks deliberately excluded:
 #   fig              — discontinued
@@ -35,7 +36,6 @@ cask_args adopt: true
 # Always recommended: shell, git essentials, and the prompt font. The font is
 # kept here because the Ghostty/powerlevel10k prompt glyphs need it regardless
 # of which terminal or apps are chosen.
-tap "homebrew/services"
 brew "bash-completion"
 brew "bat"
 brew "coreutils"
@@ -51,7 +51,6 @@ brew "zsh"
 cask "font-meslo-lg-nerd-font"
 
 # group: cloud-devops
-tap "derailed/k9s"
 brew "actionlint"
 brew "ansible"
 brew "argocd"
@@ -63,7 +62,7 @@ brew "docker"
 brew "docker-compose"
 brew "helm"
 brew "infracost"
-brew "derailed/k9s/k9s"
+brew "k9s"
 brew "minikube"
 brew "stern"
 brew "terraform-docs"
