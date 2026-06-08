@@ -23,33 +23,41 @@ source "$ZSH/oh-my-zsh.sh"
 # PATH additions
 # ---------------------------------------------------------------------------
 
-# OpenSSL (1.1 required by some Python packages and older tooling).
-# These are Intel-prefix paths (/usr/local); guard so dead paths are not
-# added on Apple Silicon, mirroring the arch-aware handling in .vimrc.
-if [ -d /usr/local/opt/openssl@1.1 ]; then
-  export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
-  export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
-  export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
+# Resolve the Homebrew prefix (Apple Silicon: /opt/homebrew, Intel: /usr/local)
+# without spawning brew, so per-arch paths below are not hardcoded.
+if [ -n "${HOMEBREW_PREFIX:-}" ]; then
+  BREW_PREFIX="${HOMEBREW_PREFIX}"
+elif [ -x /opt/homebrew/bin/brew ]; then
+  BREW_PREFIX="/opt/homebrew"
+elif [ -x /usr/local/bin/brew ]; then
+  BREW_PREFIX="/usr/local"
+else
+  BREW_PREFIX=""
 fi
 
-# OpenSSL (legacy path used by some tools on Intel Macs).
-if [ -d /usr/local/opt/openssl ]; then
-  export PATH="/usr/local/opt/openssl/bin:$PATH"
-  export DYLD_LIBRARY_PATH=/usr/local/opt/openssl/lib:${DYLD_LIBRARY_PATH:-}
+# OpenSSL (1.1 required by some Python packages and older tooling).
+# Guarded so dead paths are not added when the formula is absent.
+if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/openssl@1.1" ]; then
+  export PATH="${BREW_PREFIX}/opt/openssl@1.1/bin:$PATH"
+  export LDFLAGS="-L${BREW_PREFIX}/opt/openssl@1.1/lib"
+  export CPPFLAGS="-I${BREW_PREFIX}/opt/openssl@1.1/include"
+fi
+
+# OpenSSL (legacy path used by some tools).
+if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/openssl" ]; then
+  export PATH="${BREW_PREFIX}/opt/openssl/bin:$PATH"
+  export DYLD_LIBRARY_PATH="${BREW_PREFIX}/opt/openssl/lib:${DYLD_LIBRARY_PATH:-}"
 fi
 
 # MySQL client (for building Python/Ruby MySQL extensions).
-if [ -d /opt/homebrew/opt/mysql-client ]; then
-  export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
-  export PKG_CONFIG_PATH="/opt/homebrew/opt/mysql-client/lib/pkgconfig"
-fi
-if [ -d /usr/local/opt/mysql-client ]; then
-  export PATH="/usr/local/opt/mysql-client/bin:$PATH"
+if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/mysql-client" ]; then
+  export PATH="${BREW_PREFIX}/opt/mysql-client/bin:$PATH"
+  export PKG_CONFIG_PATH="${BREW_PREFIX}/opt/mysql-client/lib/pkgconfig"
 fi
 
 # Java 11 (via Homebrew openjdk@11).
-if [ -d /usr/local/opt/openjdk@11 ]; then
-  export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
+if [ -n "${BREW_PREFIX}" ] && [ -d "${BREW_PREFIX}/opt/openjdk@11" ]; then
+  export PATH="${BREW_PREFIX}/opt/openjdk@11/bin:$PATH"
 fi
 export PATH="$PATH:/usr/bin/java"
 export JAVA_HOME=$(/usr/libexec/java_home 2>/dev/null || true)

@@ -10,9 +10,22 @@ if command -v pyenv >/dev/null 2>&1; then
   eval "$(pyenv virtualenv-init -)"
 fi
 
+# Resolve the Homebrew prefix (Apple Silicon: /opt/homebrew, Intel: /usr/local)
+# without spawning brew, so the per-arch path below is not hardcoded.
+if [ -n "${HOMEBREW_PREFIX:-}" ]; then
+  BREW_PREFIX="${HOMEBREW_PREFIX}"
+elif [ -x /opt/homebrew/bin/brew ]; then
+  BREW_PREFIX="/opt/homebrew"
+elif [ -x /usr/local/bin/brew ]; then
+  BREW_PREFIX="/usr/local"
+else
+  BREW_PREFIX=""
+fi
+
 # Bash completion (Homebrew).
-[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] \
-  && source "/usr/local/etc/profile.d/bash_completion.sh"
+[ -n "${BREW_PREFIX}" ] \
+  && [ -r "${BREW_PREFIX}/etc/profile.d/bash_completion.sh" ] \
+  && source "${BREW_PREFIX}/etc/profile.d/bash_completion.sh"
 
 # kubectl bash completion.
 if command -v kubectl >/dev/null 2>&1; then
