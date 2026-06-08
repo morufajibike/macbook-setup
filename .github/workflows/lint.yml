@@ -21,8 +21,12 @@ jobs:
           severity: warning
           # Check all .sh files recursively.
           scandir: "."
-          # Exclude the .fonts-work directory (generated, not committed).
-          ignore_paths: ".fonts-work"
+          # Space-separated paths to exclude (matched by component).
+          # - .fonts-work: generated font cache, not committed.
+          # - dotfiles: interactive shell config, not part of the script
+          #   suite. .zshrc is zsh (e.g. powerlevel10k's ${(%):-%n}), which
+          #   shellcheck cannot parse, producing unfixable false positives.
+          ignore_paths: ".fonts-work dotfiles"
 
   shfmt:
     name: shfmt formatting check
