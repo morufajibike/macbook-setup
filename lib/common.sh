@@ -62,6 +62,31 @@ command_exists() {
 }
 
 # ---------------------------------------------------------------------------
+# Homebrew PATH bootstrap
+# ---------------------------------------------------------------------------
+
+# Ensure Homebrew and its installed tools (pyenv, tmux, node, ...) are on PATH.
+# install.sh runs each numbered script as a separate process, so the shellenv
+# set in 00-brew.sh does not propagate to siblings; re-establish it here so
+# every script can find brew-installed binaries. Read-only PATH setup, so it
+# runs in dry-run too (needed for accurate previews on a machine that has brew).
+ensure_brew_on_path() {
+  if command_exists brew; then
+    return 0
+  fi
+  if [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [ -x /usr/local/bin/brew ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+  # Explicit success: this function is called as a bare statement under set -e,
+  # so make the exit status immune to any future trailing-line edit.
+  return 0
+}
+
+ensure_brew_on_path
+
+# ---------------------------------------------------------------------------
 # Repository root resolution
 # ---------------------------------------------------------------------------
 
