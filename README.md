@@ -210,6 +210,7 @@ Every file below is symlinked from `dotfiles/` into `$HOME`.
 | Dotfile | Manages |
 |---|---|
 | `.zshrc` | oh-my-zsh with the powerlevel10k theme and plugins (`git`, `autopep8`, `pep8`, `aws`, `tmux`, `zsh-syntax-highlighting`, `zsh-autosuggestions`); pyenv init; NVM; arch-aware MySQL client and system Java PATH entries; the `k=kubectl` alias; sources `~/.bash_additions`; the powerlevel10k instant-prompt block; and the `claude` tmux wrapper (see below). |
+| `.p10k.zsh` | The powerlevel10k prompt configuration (saved `p10k configure` wizard output), sourced by `.zshrc` to give the preconfigured two-line Rainbow prompt (framed with `╭─ … ╰─`, 12-hour clock). |
 | `.vimrc` | Vundle-managed plugins — NERDTree, `vim-flake8`, `vim-airline`, SimpylFold, `copilot.vim`, `vim-markdown`, and `markdown-preview.nvim` — plus indent/fold settings, `Ctrl-t` to toggle NERDTree, flake8 on save for `*.py`, Markdown conceal on Markdown buffers, and a buffer-local `:Glow` command that renders the current file in the terminal via `glow`. |
 | `.tmux.conf` | TPM plugins (`tpm`, `tmux-sensible`, `nord-tmux`, `tmux-resurrect`, `tmux-colors-solarized`, `tmux-sessionx`); top status bar; vi-style keys; pane navigation/splitting; large scrollback; status-line styling. |
 | `.bashrc` | Interactive bash setup: sources `~/.bash_additions`, pyenv init, Homebrew and kubectl completion, Rust/cargo env. |
@@ -281,8 +282,9 @@ newlines/carriage returns are rejected to prevent config injection.
 
 A few things complete on first use rather than during the bootstrap:
 
-- **powerlevel10k prompt.** On the first interactive shell, if `~/.p10k.zsh` is
-  absent, powerlevel10k runs its `p10k configure` wizard automatically. The
+- **powerlevel10k prompt.** The prompt configuration ships in the repo
+  (`dotfiles/.p10k.zsh`), so a fresh install gets the preconfigured prompt
+  immediately and the `p10k configure` wizard does **not** auto-run. The
   required `MesloLGS NF` font is installed by the `core` Brewfile group.
   Re-run the interactive wizard at any time to change the prompt style:
   ```sh
@@ -292,25 +294,13 @@ A few things complete on first use rather than during the bootstrap:
   reloads the prompt. The wizard's first questions detect your terminal font,
   so the terminal must already be using the `MesloLGS NF` Nerd Font (Ghostty's
   bundled config sets this; other terminals must set it manually) or the
-  preview glyphs render as missing-glyph boxes. The wizard asks a series of
-  questions; the key answers that produce the one-line **Rainbow** prompt
-  (filled coloured powerline segments) are:
-
-  | Question | Answer |
-  |---|---|
-  | Prompt Style | Rainbow |
-  | Show current time | 24-hour |
-  | Prompt Separators | Angled |
-  | Prompt Heads | Sharp |
-  | Prompt Tails | Flat |
-  | Prompt Height | One line |
-  | Prompt Spacing | Compact |
-  | Icons | Many |
-  | Prompt Flow | Concise |
-
-  then apply/save when prompted. `p10k configure` only affects the machine it
-  is run on; a fresh install elsewhere falls back to the wizard unless
-  `~/.p10k.zsh` is committed into `dotfiles/`.
+  preview glyphs render as missing-glyph boxes. The shipped prompt is a
+  two-line **Rainbow** powerline prompt (filled coloured segments) framed with
+  `╭─ … ╰─` and a 12-hour clock. The exact wizard options that produced it are
+  recorded in the header comment at the top of `dotfiles/.p10k.zsh`, which is
+  the single source of truth. `p10k configure` rewrites `~/.p10k.zsh`, which is
+  the symlinked `dotfiles/.p10k.zsh`, so committing that file is what propagates
+  the look to every fresh install.
 - **Vim plugins.** Installed by `30-vim.sh`. To install plugins added to
   `.vimrc` later, or to re-run by hand:
   ```sh
