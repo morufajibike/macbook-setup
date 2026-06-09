@@ -89,7 +89,11 @@ fi
 # Run numbered scripts in order
 # ---------------------------------------------------------------------------
 
-find "${SCRIPT_DIR}/scripts" -name '[0-9]*.sh' | sort | while read -r script; do
+# Process substitution (< <(...)) rather than a pipe keeps the while loop in
+# the current shell, preserving stdin as the user's TTY. A pipe would move the
+# loop into a subshell whose stdin is the pipe itself, so every child script
+# would inherit the pipe as stdin and lose the ability to prompt the user.
+while read -r script; do
   if [[ ! -f "${script}" ]]; then
     # Should be unreachable (find only yields existing files), but guards
     # defensively against a race where a script is removed mid-run.
@@ -102,7 +106,7 @@ find "${SCRIPT_DIR}/scripts" -name '[0-9]*.sh' | sort | while read -r script; do
   # silently drop a step and still report overall success.
   bash "${script}"
   info "Completed: ${script}"
-done
+done < <(find "${SCRIPT_DIR}/scripts" -name '[0-9]*.sh' | sort)
 
 # ---------------------------------------------------------------------------
 # Summary

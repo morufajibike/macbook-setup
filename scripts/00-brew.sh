@@ -197,6 +197,15 @@ list_group_entries() {
   return 0
 }
 
+# Returns 0 if Docker Desktop is installed in /Applications, 1 otherwise.
+# Docker Desktop owns /usr/local/bin/docker (and /usr/bin/docker on some
+# versions), so `brew "docker"` would fail to link and abort the whole bundle
+# run. Detection is by the app bundle rather than the symlink because the
+# symlink path varies between Docker Desktop versions.
+docker_desktop_present() {
+  [[ -d "/Applications/Docker.app" ]]
+}
+
 # Validates a list of group names; exits non-zero on the first unknown name.
 # Usage: validate_groups <group> [<group> ...]
 validate_groups() {
@@ -295,6 +304,37 @@ if [[ "${#SELECTED_GROUPS[@]}" -gt 0 ]]; then
     printf 'cask_args adopt: true\n'
     assemble_brewfile "${SELECTED_GROUPS[@]}"
   } >"${TMP_BREWFILE}"
+
+  # When Docker Desktop is present its symlink at /usr/local/bin/docker
+  # conflicts with the Homebrew docker formula, causing `brew bundle` to abort.
+  # Drop ONLY the exact `brew "docker"` formula line from the assembled
+  # Brewfile so the rest of the bundle (including docker-compose and the
+  # cask "docker" apps entry) is unaffected.  The colima-based docker CLI is
+  # the preferred setup on a fresh machine; this skip only activates when
+  # Docker Desktop is already installed and the conflict would otherwise break
+  # the whole run.
+  #
+  # Gate on the formula line actually being present so we only warn-and-skip
+  # when there is something to remove (e.g. BREW_GROUPS=core selects no docker).
+  if docker_desktop_present && grep -qxF 'brew "docker"' "${TMP_BREWFILE}"; then
+    if [[ "${DRY_RUN}" == "1" ]]; then
+      info "[dry-run] Docker Desktop detected -- skipping brew \"docker\" formula to avoid link conflict."
+    else
+      warn "Docker Desktop detected at /Applications/Docker.app."
+      warn "Skipping brew \"docker\" formula to avoid Homebrew link conflict."
+      info "To switch to the Homebrew docker CLI, quit Docker Desktop, uninstall it, then re-run."
+    fi
+    # Filter the exact formula line from the temp Brewfile in all modes so the
+    # dry-run Brewfile preview faithfully reflects what brew bundle would see.
+    # grep -vxF matches the full line as a fixed string; this will not touch
+    # brew "docker-compose" or cask "docker" (the apps-group entry). Use a
+    # mktemp-allocated file (not a predictable ${TMP_BREWFILE}.filtered sibling)
+    # to avoid a symlink-followable path under a world-writable TMPDIR; the mv
+    # rename consumes it, so no extra cleanup is needed.
+    filtered="$(mktemp -t brewfile.XXXXXX)"
+    grep -vxF 'brew "docker"' "${TMP_BREWFILE}" >"${filtered}"
+    mv -f "${filtered}" "${TMP_BREWFILE}"
+  fi
 
   # Count only install entries; the cask_args directive is not a package.
   total="$(grep -cE '^(tap|brew|cask) ' "${TMP_BREWFILE}" || true)"
