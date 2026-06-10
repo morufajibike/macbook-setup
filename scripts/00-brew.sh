@@ -295,7 +295,7 @@ fi
 if [[ "${#SELECTED_GROUPS[@]}" -gt 0 ]]; then
   TMP_BREWFILE="$(mktemp -t brewfile.XXXXXX)"
   # Ensure the temp file is removed on any exit path.
-  trap 'rm -f "${TMP_BREWFILE}"' EXIT
+  trap 'rm -f "${TMP_BREWFILE}" "${filtered:-}"' EXIT
 
   # Prepend `cask_args adopt: true` so an app already present on disk (e.g.
   # installed outside Homebrew) is adopted rather than reinstalled. Combined
@@ -330,9 +330,10 @@ if [[ "${#SELECTED_GROUPS[@]}" -gt 0 ]]; then
     # brew "docker-compose" or cask "docker" (the apps-group entry). Use a
     # mktemp-allocated file (not a predictable ${TMP_BREWFILE}.filtered sibling)
     # to avoid a symlink-followable path under a world-writable TMPDIR; the mv
-    # rename consumes it, so no extra cleanup is needed.
+    # rename consumes it on the happy path, and the EXIT trap also removes it
+    # as a belt-and-braces guard if the process is killed before the mv.
     filtered="$(mktemp -t brewfile.XXXXXX)"
-    grep -vxF 'brew "docker"' "${TMP_BREWFILE}" >"${filtered}"
+    grep -vxF 'brew "docker"' "${TMP_BREWFILE}" >"${filtered}" || true
     mv -f "${filtered}" "${TMP_BREWFILE}"
   fi
 
