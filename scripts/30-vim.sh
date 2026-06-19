@@ -37,4 +37,18 @@ else
   warn "vim not found -- skipping plugin installation."
 fi
 
+# ---------------------------------------------------------------------------
+# Build the markdown-preview.nvim preview server
+# ---------------------------------------------------------------------------
+
+# Separate vim launch: plugin is only on runtimepath after PluginInstall has cloned it.
+MKDP_DIR="${HOME}/.vim/bundle/markdown-preview.nvim"
+
+if command_exists vim && [[ -d "${MKDP_DIR}" ]]; then
+  info "Building markdown-preview.nvim preview server..."
+  run vim -u "${HOME}/.vimrc" +'call mkdp#util#install_sync()' +qall
+else
+  warn "markdown-preview.nvim not found -- skipping preview server build."
+fi
+
 info "30-vim: done."
