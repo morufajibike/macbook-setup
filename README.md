@@ -129,7 +129,7 @@ assembles a temporary Brewfile from only the selected groups before calling
 
 | Group | Default | Roughly contains |
 |---|---|---|
-| `core` | **yes** | Shell and git essentials, plus the prompt font: `zsh`, `bash-completion`, `git-lfs`, `gh`, `tmux`, `bat`, `coreutils`, `gawk`, `jq`, `tree`, `wget`, `pre-commit`, and the `font-meslo-lg-nerd-font` cask. |
+| `core` | **yes** | Shell and git essentials, plus the prompt font: `zsh`, `bash-completion`, `git-lfs`, `glow`, `gh`, `tmux`, `bat`, `coreutils`, `gawk`, `jq`, `tree`, `wget`, `pre-commit`, and the `font-meslo-lg-nerd-font` cask. |
 | `cloud-devops` | no | Cloud and container tooling: `awscli`, `azure-cli`, `ansible`, `docker`/`docker-compose`, `colima`, `helm`, `minikube`, `k9s`, `stern`, `argocd`, and Terraform tooling (`tfenv`, `terragrunt`, `tfsort`, `terraform-docs`, `checkov`, `infracost`, `trivy`, `actionlint`). |
 | `languages` | no | Runtimes and toolchains: `node`, `python@3.10`, `pyenv`, `pipenv`, `uv`, `ipython`. |
 | `databases` | no | `mysql`, `postgresql@17`. |
@@ -189,7 +189,7 @@ idempotent.
 | `10-shell.sh` | Installs oh-my-zsh unattended (`RUNZSH=no CHSH=no`), then clones the powerlevel10k theme, `zsh-syntax-highlighting`, and `zsh-autosuggestions` — each only if absent. |
 | `20-dotfiles.sh` | Symlinks every file under `dotfiles/` into `$HOME` at the matching relative path, backing up anything in the way. Also symlinks the whole `git-hooks/` directory to `~/.git-hooks`. |
 | `25-git-identity.sh` | Sets the per-machine git identity. Prompts for name/email (or reads `GIT_USER_NAME`/`GIT_USER_EMAIL`, or skips on a non-TTY) and writes them to the untracked `~/.gitconfig.local`. |
-| `30-vim.sh` | Clones Vundle if absent, then runs `vim -u ~/.vimrc +PluginInstall +qall` to install the plugins declared in `.vimrc`. |
+| `30-vim.sh` | Clones Vundle if absent, then runs `vim -u ~/.vimrc +PluginInstall +qall` to install the plugins declared in `.vimrc`, then builds the `markdown-preview.nvim` preview server. |
 | `40-tmux.sh` | Clones TPM if absent, then runs `tpm/bin/install_plugins` to install the plugins declared in `.tmux.conf`. |
 | `50-python.sh` | Installs the pinned Python version (`3.13.11`) via pyenv and sets it as the global default, then installs `flake8`, `ipython`, and `pytest` into that version's pip. |
 | `60-fonts.sh` | Installs fonts not available as Homebrew casks: FiraCode and Powerline fonts into `~/Library/Fonts`. Clones the Operator Mono ligature builder and builds it only if you supply the original OTF files in `.fonts-work/operator-mono-lig/original/`. |
@@ -210,7 +210,7 @@ Every file below is symlinked from `dotfiles/` into `$HOME`.
 | Dotfile | Manages |
 |---|---|
 | `.zshrc` | oh-my-zsh with the powerlevel10k theme and plugins (`git`, `autopep8`, `pep8`, `aws`, `tmux`, `zsh-syntax-highlighting`, `zsh-autosuggestions`); pyenv init; NVM; arch-aware MySQL client and system Java PATH entries; the `k=kubectl` alias; sources `~/.bash_additions`; the powerlevel10k instant-prompt block; and the `claude` tmux wrapper (see below). |
-| `.vimrc` | Vundle-managed plugins — NERDTree, `vim-flake8`, `vim-airline`, SimpylFold, and `copilot.vim` — plus indent/fold settings, `Ctrl-t` to toggle NERDTree, and flake8 on save for `*.py`. |
+| `.vimrc` | Vundle-managed plugins — NERDTree, `vim-flake8`, `vim-airline`, SimpylFold, `copilot.vim`, `vim-markdown`, and `markdown-preview.nvim` — plus indent/fold settings, `Ctrl-t` to toggle NERDTree, flake8 on save for `*.py`, Markdown conceal on Markdown buffers, and a buffer-local `:Glow` command that renders the current file in the terminal via `glow`. |
 | `.tmux.conf` | TPM plugins (`tpm`, `tmux-sensible`, `nord-tmux`, `tmux-resurrect`, `tmux-colors-solarized`, `tmux-sessionx`); top status bar; vi-style keys; pane navigation/splitting; large scrollback; status-line styling. |
 | `.bashrc` | Interactive bash setup: sources `~/.bash_additions`, pyenv init, Homebrew and kubectl completion, Rust/cargo env. |
 | `.bash_additions` | Shared aliases/functions sourced by both `.zshrc` and `.bashrc`: git shortcuts (`ga`, `gs`, `gsw`, `gsh`, `gl`, `gcom`, `gca`, `gcb`) and project helpers. |
@@ -235,6 +235,22 @@ machine:
   `~/.pre-commit-config.yaml` does not exist** (see [Security notes](#security--trust-notes)).
 - `pre-push`, `post-checkout`, `post-commit`, `post-merge` — Git LFS
   passthrough hooks; each warns and exits if `git-lfs` is not on PATH.
+
+---
+
+## Rendering Markdown
+
+The Vim setup ships three ways to read a Markdown file, from a quick in-editor
+view to a fully-rendered browser preview. All are provided by the `tabular`,
+`vim-markdown`, and `markdown-preview.nvim` plugins (installed by `30-vim.sh`)
+plus the `glow` formula (`core` Brewfile group). (`tabular` is a `vim-markdown`
+dependency that enables table alignment.)
+
+| Method | How | Notes |
+|---|---|---|
+| In the Vim buffer | Open the `.md` file | Syntax highlighting, section folding (`space` toggles `za`), and conceal of markup — `**bold**` shows as `bold` and link URLs are hidden (`conceallevel=2`). Plain highlighting/conceal only; it does not draw tables or large headings. |
+| In the terminal | `:Glow` in a Markdown buffer, or `glow <file>.md` from the shell | Renders the current file via the `glow` pager; press `q` to return to Vim. Requires the `glow` formula. |
+| In the browser | `:MarkdownPreview` in a Markdown buffer | Fully-rendered, live-updating HTML preview that refreshes on save; `:MarkdownPreviewStop` closes it. Server built by `30-vim.sh` (downloads a prebuilt binary via `curl`; no `node` required), pinned to loopback (`g:mkdp_open_to_the_world = 0`). |
 
 ---
 

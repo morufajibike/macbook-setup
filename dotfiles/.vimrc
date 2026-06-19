@@ -31,6 +31,11 @@ Plugin 'vim-airline/vim-airline'
 Plugin 'tmhedberg/SimpylFold'
 Plugin 'github/copilot.vim'
 
+" Markdown
+Plugin 'godlygeek/tabular'
+Plugin 'preservim/vim-markdown'
+Plugin 'iamcco/markdown-preview.nvim'
+
 " All Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -41,6 +46,9 @@ nmap <C-t> :NERDTreeToggle<CR>
 nnoremap <space> za
 
 autocmd BufWritePost *.py call flake8#Flake8()
+autocmd FileType markdown setlocal conceallevel=2
+autocmd FileType markdown command! -buffer Glow execute '!glow -p ' . shellescape(expand('%'), 1)
+let g:mkdp_open_to_the_world = 0
 
 augroup myvimrc
     au!
