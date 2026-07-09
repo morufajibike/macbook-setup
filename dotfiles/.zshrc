@@ -91,3 +91,4 @@ claude() {
 # powerlevel10k prompt configuration. If ~/.p10k.zsh is absent, p10k runs its
 # interactive `p10k configure` wizard automatically on first shell launch.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+export PATH=$PATH:$HOME/.local/bin
