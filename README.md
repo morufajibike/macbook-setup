@@ -193,7 +193,7 @@ idempotent.
 | `40-tmux.sh` | Clones TPM if absent, then runs `tpm/bin/install_plugins` to install the plugins declared in `.tmux.conf`. |
 | `50-python.sh` | Installs the pinned Python version (`3.13.11`) via pyenv and sets it as the global default, then installs `flake8`, `ipython`, and `pytest` into that version's pip. |
 | `60-fonts.sh` | Installs fonts not available as Homebrew casks: FiraCode and Powerline fonts into `~/Library/Fonts`. Clones the Operator Mono ligature builder and builds it only if you supply the original OTF files in `.fonts-work/operator-mono-lig/original/`. |
-| `70-ssh.sh` | Generates an Ed25519 GitHub SSH key at `~/.ssh/id_ed25519_github`, adds it to the agent/keychain, appends a `github.com` host block to `~/.ssh/config`, and prints the public key. Skipped entirely if the key already exists. |
+| `70-ssh.sh` | Reuses any recognised private key under `~/.ssh/` in a strength-ordered preference list (`id_ed25519`, `id_ed25519_sk`, `id_ed25519_github`, `id_ecdsa_sk`, `id_ecdsa`, `id_rsa`; `id_dsa` is excluded); otherwise generates a new Ed25519 key at `~/.ssh/id_ed25519_github`. In both cases it adds the key to the agent/keychain, appends a `github.com` host block to `~/.ssh/config` pointing at it, and prints the public key. |
 | `80-macos.sh` | Applies a curated set of reversible `defaults write` system settings, then restarts Finder/Dock/SystemUIServer. |
 
 `80-macos.sh` sets: show all file extensions and hidden files; Finder path and
@@ -320,10 +320,15 @@ A few things complete on first use rather than during the bootstrap:
 - **Tmux plugins.** Installed by `40-tmux.sh` via TPM. Inside a running tmux
   session, press `prefix + I` (capital i) to install newly added plugins, or
   `prefix + U` to update.
-- **GitHub SSH key.** `70-ssh.sh` generates `~/.ssh/id_ed25519_github` and adds
-  it to the agent/keychain. **Add the public key to GitHub** at
+- **GitHub SSH key.** `70-ssh.sh` reuses any recognised `~/.ssh/id_*` private
+  key from a strength-ordered allow-list (Ed25519 variants first, then ECDSA,
+  then RSA; DSA is excluded) or, if none is present, generates
+  `~/.ssh/id_ed25519_github`. Either way it
+  adds the key to the agent/keychain. **Add the public key to GitHub** at
   <https://github.com/settings/keys>:
   ```sh
+  # Whichever key the script selected -- adjust the filename if you are
+  # reusing an existing key under ~/.ssh/id_*.pub.
   cat ~/.ssh/id_ed25519_github.pub
   ```
 
@@ -358,7 +363,11 @@ of `scripts/50-python.sh`.
   directories already exist.
 - Symlinks that already point to the right source are left alone.
 - Python is skipped if the pinned version is already installed via pyenv.
-- The SSH key is skipped if `~/.ssh/id_ed25519_github` already exists.
+- The SSH key step is skipped if a recognised `~/.ssh/id_*` private key
+  (Ed25519 / ECDSA / RSA in that preference order; DSA excluded) already
+  exists; otherwise a new `~/.ssh/id_ed25519_github` is created. The
+  agent-add and `~/.ssh/config` append run in both cases and are individually
+  idempotent.
 
 Backups accumulate in `~/dotfiles-backup/` (one timestamped entry per replaced
 file). That directory is safe to prune once you are confident the deployment is
@@ -380,10 +389,12 @@ understanding before you run it:
   powerlevel10k, Vundle, TPM, and the font repositories are cloned from their
   default branch with no commit pin, so you receive whatever is current
   upstream when you run the bootstrap.
-- **The generated SSH key has no passphrase.** `70-ssh.sh` creates the key with
+- **A newly generated SSH key has no passphrase.** When `70-ssh.sh` has to
+  create a key (i.e. no recognised `~/.ssh/id_*` private key was found), it uses
   `-N ""` so the unattended run does not block on a prompt. For a
   passphrase-protected key, remove `-N ""` (ssh-keygen will then prompt) or
-  supply one in that script before running.
+  supply one in that script before running. Reused existing keys are left
+  untouched -- their passphrase (or lack of one) is whatever you set.
 - **The global pre-commit hook is opt-in.** The `pre-commit` hook (via
   `core.hooksPath`) runs a gitleaks secret scan only if `~/.pre-commit-config.yaml`
   exists. Without that file the hook is a no-op, so no secret scanning happens
