@@ -82,9 +82,9 @@ for basename in "${SSH_KEY_CANDIDATES[@]}"; do
 
   # Reject sidecar / backup filenames defensively.
   case "${basename}" in
-    *.pub | *-cert | *.bak | *.old | *~)
-      continue
-      ;;
+  *.pub | *-cert | *.bak | *.old | *~)
+    continue
+    ;;
   esac
 
   # Validate that it parses as a private key. Redirecting stdin from
