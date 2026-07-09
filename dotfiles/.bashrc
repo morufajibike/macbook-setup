@@ -3,6 +3,8 @@
 # Shared aliases and functions.
 source ~/.bash_additions
 
+source ~/.bash_custom_additions
+
 # pyenv initialisation.
 export PATH="$HOME/.pyenv/bin:$PATH"
 if command -v pyenv >/dev/null 2>&1; then
